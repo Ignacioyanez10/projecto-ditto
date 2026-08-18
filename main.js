@@ -1,4 +1,5 @@
 import './style.css';
+import { supabase, isSupabaseConfigured } from './src/supabase.js';
 
 // ============================================================
 // CONFIGURACIÓN DEL ADMINISTRADOR
@@ -149,11 +150,21 @@ async function processSelectedFiles(files) {
 // ================================================================
 // INITIALIZE
 // ================================================================
-function init() {
-  loadCatalog();
+async function init() {
   loadCart();
-  renderProducts();
+  await loadCatalog();
   setupEventListeners();
+  setupRealtime();
+}
+
+function setupRealtime() {
+  if (!isSupabaseConfigured || !supabase) return;
+  supabase
+    .channel('public:products')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, async () => {
+      await loadCatalog(true);
+    })
+    .subscribe();
 }
 
 function formatPrice(price) {
@@ -163,7 +174,34 @@ function formatPrice(price) {
 // ================================================================
 // CATALOG PERSISTENCE
 // ================================================================
-function loadCatalog() {
+async function loadCatalog(skipLocalSeed = false) {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('id', { ascending: false });
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        products = data;
+        renderProducts();
+        return;
+      } else if (!skipLocalSeed) {
+        // If DB is empty, check if we have local items or default products to migrate
+        const saved = localStorage.getItem('ditto_catalog');
+        const initial = saved ? JSON.parse(saved) : defaultProducts;
+        products = initial;
+        renderProducts();
+        return;
+      }
+    } catch (err) {
+      console.warn('Error loading from Supabase, falling back to localStorage:', err);
+    }
+  }
+
+  // Fallback to localStorage
   const saved = localStorage.getItem('ditto_catalog');
   if (saved) {
     products = JSON.parse(saved);
@@ -171,13 +209,14 @@ function loadCatalog() {
     products = [...defaultProducts];
     saveCatalog();
   }
+  renderProducts();
 }
 
 function saveCatalog() {
   try {
     localStorage.setItem('ditto_catalog', JSON.stringify(products));
   } catch (e) {
-    alert('⚠️ No hay suficiente memoria en el navegador para guardar más productos. Intenta eliminar algunos productos antiguos.');
+    console.warn('Local storage quota exceeded');
   }
 }
 
@@ -582,10 +621,19 @@ function editProduct(id) {
   adminOverlay.classList.add('active');
 }
 
-function deleteProduct(id) {
+async function deleteProduct(id) {
   const product = products.find(p => p.id === id);
   if (!product) return;
   if (!confirm(`¿Seguro que quieres eliminar "${product.name}" del catálogo?`)) return;
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (error) console.error('Error deleting from Supabase:', error);
+    } catch (err) {
+      console.error('Supabase delete error:', err);
+    }
+  }
 
   products = products.filter(p => p.id !== id);
   // Also remove from cart if present
@@ -596,10 +644,19 @@ function deleteProduct(id) {
   renderProducts();
 }
 
-function toggleSold(id) {
+async function toggleSold(id) {
   const product = products.find(p => p.id === id);
   if (!product) return;
   product.isSold = !product.isSold;
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase.from('products').update({ isSold: product.isSold }).eq('id', id);
+      if (error) console.error('Error updating sold status in Supabase:', error);
+    } catch (err) {
+      console.error('Supabase update error:', err);
+    }
+  }
 
   // Remove from cart if now sold
   if (product.isSold) {
@@ -636,13 +693,27 @@ async function handleAddProduct(e) {
 
   if (editId) {
     // UPDATE existing product
-    const idx = products.findIndex(p => p.id === parseInt(editId));
+    const targetId = parseInt(editId);
+    const updatedData = {
+      name,
+      size,
+      proportions,
+      price,
+      images: finalImages
+    };
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { error } = await supabase.from('products').update(updatedData).eq('id', targetId);
+        if (error) console.error('Error updating product in Supabase:', error);
+      } catch (err) {
+        console.error('Supabase update error:', err);
+      }
+    }
+
+    const idx = products.findIndex(p => p.id === targetId);
     if (idx !== -1) {
-      products[idx].name = name;
-      products[idx].size = size;
-      products[idx].proportions = proportions;
-      products[idx].price = price;
-      products[idx].images = finalImages;
+      products[idx] = { ...products[idx], ...updatedData };
     }
   } else {
     // CREATE new product
@@ -655,6 +726,16 @@ async function handleAddProduct(e) {
       images: finalImages,
       isSold: false
     };
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { error } = await supabase.from('products').insert([newProduct]);
+        if (error) console.error('Error adding product in Supabase:', error);
+      } catch (err) {
+        console.error('Supabase insert error:', err);
+      }
+    }
+
     products.unshift(newProduct);
   }
 

@@ -1069,10 +1069,11 @@ async function handleOrderSubmit(e) {
   // Visual feedback on the submit button
   const originalBtnText = orderSubmitBtn ? orderSubmitBtn.innerText : '';
   if (orderSubmitBtn) {
-    orderSubmitBtn.innerText = '✅ ¡PEDIDO COPIADO! ABRIENDO...';
+    orderSubmitBtn.innerText = '✅ ¡PEDIDO COPIADO! ABRIENDO EN 1.5s...';
     orderSubmitBtn.style.backgroundColor = '#1b5e20';
     orderSubmitBtn.style.borderColor = '#1b5e20';
     orderSubmitBtn.style.color = '#ffffff';
+    orderSubmitBtn.disabled = true;
   }
 
   // Copy to clipboard immediately
@@ -1096,20 +1097,21 @@ async function handleOrderSubmit(e) {
   }
 
   // Show floating toast confirmation
-  showToastNotification('📋 ¡Pedido copiado al portapapeles! Pégalo en el chat de Instagram 🙌');
+  showToastNotification('📋 ¡Pedido copiado al portapapeles! Abriendo Instagram... 🙌', 'content_paste_go', 5000);
 
-  // Open Instagram immediately in direct user interaction context
-  window.open('https://ig.me/m/dittomarkett', '_blank');
-
+  // Wait 1.5 seconds (1500ms) before opening Instagram and closing modal
   setTimeout(() => {
+    window.open('https://ig.me/m/dittomarkett', '_blank');
+
     if (orderSubmitBtn) {
       orderSubmitBtn.innerText = originalBtnText;
       orderSubmitBtn.style.backgroundColor = '';
       orderSubmitBtn.style.borderColor = '';
       orderSubmitBtn.style.color = '';
+      orderSubmitBtn.disabled = false;
     }
     closeOrderModal();
-  }, 700);
+  }, 1500);
 }
 
 let toastTimeout = null;

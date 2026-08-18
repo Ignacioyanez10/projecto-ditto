@@ -524,11 +524,11 @@ function setupEventListeners() {
   });
 
   // Order Modal controls
-  closeOrderModalBtn.addEventListener('click', closeOrderModal);
-  orderOverlay.addEventListener('click', closeOrderModal);
-  orderForm.addEventListener('submit', handleOrderSubmit);
+  if (closeOrderModalBtn) closeOrderModalBtn.addEventListener('click', closeOrderModal);
+  if (orderOverlay) orderOverlay.addEventListener('click', closeOrderModal);
+  if (orderForm) orderForm.addEventListener('submit', handleOrderSubmit);
 
-  checkoutBtn.addEventListener('click', openOrderModal);
+  if (checkoutBtn) checkoutBtn.addEventListener('click', openOrderModal);
 }
 
 // ================================================================
@@ -865,11 +865,11 @@ async function handleOrderSubmit(e) {
 
   const total = cart.reduce((sum, item) => sum + item.price, 0);
 
-  const name = orderNameInput.value.trim() || '____________________';
-  const rut = orderRutInput.value.trim() || '____________________';
-  const phone = orderPhoneInput.value.trim() || '____________________';
-  const city = orderCityInput.value.trim() || '____________________';
-  const address = orderAddressInput.value.trim() || '____________________';
+  const name = (orderNameInput && orderNameInput.value.trim()) || 'No especificado';
+  const rut = (orderRutInput && orderRutInput.value.trim()) || 'No especificado';
+  const phone = (orderPhoneInput && orderPhoneInput.value.trim()) || 'No especificado';
+  const city = (orderCityInput && orderCityInput.value.trim()) || 'No especificado';
+  const address = (orderAddressInput && orderAddressInput.value.trim()) || 'No especificado';
 
   // Build complete structured purchase form message
   let message = `📋 FORMULARIO DE COMPRA - DITTO MARKET\n`;
@@ -895,34 +895,29 @@ async function handleOrderSubmit(e) {
   message += `• Medio de Pago: Transferencia Bancaria\n\n`;
   message += `¡Hola Ditto Market! Vengo desde el catálogo web y deseo comprar estas piezas. ¿Me confirmas disponibilidad y datos de transferencia? 🙌`;
 
+  // Copy to clipboard immediately
   try {
-    await navigator.clipboard.writeText(message);
-    const originalText = orderSubmitBtn.innerText;
-    orderSubmitBtn.innerText = '¡PEDIDO COPIADO! ABRIENDO INSTAGRAM...';
-    orderSubmitBtn.style.background = '#008800';
-    orderSubmitBtn.style.borderColor = '#008800';
-    orderSubmitBtn.style.color = '#fff';
-
-    setTimeout(() => {
-      window.open('https://ig.me/m/dittomarkett', '_blank');
-      orderSubmitBtn.innerText = originalText;
-      orderSubmitBtn.style.background = '';
-      orderSubmitBtn.style.borderColor = '';
-      orderSubmitBtn.style.color = '';
-      closeOrderModal();
-    }, 1200);
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(message);
+    } else {
+      const tempTextArea = document.createElement('textarea');
+      tempTextArea.value = message;
+      tempTextArea.style.position = 'fixed';
+      tempTextArea.style.left = '-999999px';
+      tempTextArea.style.top = '-999999px';
+      document.body.appendChild(tempTextArea);
+      tempTextArea.focus();
+      tempTextArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempTextArea);
+    }
   } catch (err) {
-    // Fallback if clipboard API is blocked
-    const tempTextArea = document.createElement('textarea');
-    tempTextArea.value = message;
-    document.body.appendChild(tempTextArea);
-    tempTextArea.select();
-    document.execCommand('copy');
-    document.body.removeChild(tempTextArea);
-
-    window.open('https://ig.me/m/dittomarkett', '_blank');
-    closeOrderModal();
+    console.warn('Clipboard write fallback:', err);
   }
+
+  // Open Instagram immediately in direct user interaction context
+  window.open('https://ig.me/m/dittomarkett', '_blank');
+  closeOrderModal();
 }
 
 init();

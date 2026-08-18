@@ -1111,7 +1111,7 @@ async function handleOrderSubmit(e) {
       orderSubmitBtn.disabled = false;
     }
     closeOrderModal();
-  }, 1500);
+  }, 3000);
 }
 
 let toastTimeout = null;

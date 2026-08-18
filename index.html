@@ -186,22 +186,53 @@
           <div id="file-name-display" class="file-name-display">Ningún archivo seleccionado</div>
           <small>Las imágenes se comprimirán automáticamente.</small>
         </div>
+        <!-- Tallas -->
         <div class="form-row">
           <div class="form-group">
-            <label>Talla:</label>
-            <input type="text" id="p-size" required placeholder="Ej: L">
+            <label for="p-size">Talla Principal / US:</label>
+            <input type="text" id="p-size" required placeholder="Ej: 32x32 US o L">
           </div>
           <div class="form-group">
-            <label>Medidas (cm):</label>
-            <input type="text" id="p-proportions" placeholder="Ej: 70x55">
+            <label for="p-size-nat">Talla Nacional / Equiv. (Opcional):</label>
+            <input type="text" id="p-size-nat" placeholder="Ej: 42 Nacional">
           </div>
         </div>
+
+        <!-- Medidas Detalladas (Opcionales) -->
+        <div class="form-section-title">Medidas Detalladas (Opcionales):</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="p-waist">Ancho de cintura (cm):</label>
+            <input type="text" id="p-waist" placeholder="Ej: 42 cm">
+          </div>
+          <div class="form-group">
+            <label for="p-rise">Tiro (cm):</label>
+            <input type="text" id="p-rise" placeholder="Ej: 28 cm">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="p-length">Largo total (cm):</label>
+            <input type="text" id="p-length" placeholder="Ej: 102 cm">
+          </div>
+          <div class="form-group">
+            <label for="p-cuff">Ancho de basta / frontal (cm):</label>
+            <input type="text" id="p-cuff" placeholder="Ej: 21 cm">
+          </div>
+        </div>
+
         <div class="form-group">
-          <label>Precio (CLP):</label>
+          <label for="p-proportions">Otras Medidas / Generales (Opcional):</label>
+          <input type="text" id="p-proportions" placeholder="Ej: 70x55 cm (para polerones/poleras)">
+        </div>
+
+        <div class="form-group">
+          <label for="p-price">Precio (CLP):</label>
           <input type="number" id="p-price" required placeholder="Ej: 25000">
         </div>
-        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;" id="admin-submit-btn">[ GUARDAR
-          EN CATÁLOGO ]</button>
+        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;" id="admin-submit-btn">[ GUARDAR EN CATÁLOGO ]</button>
       </form>
     </div>
   </div>

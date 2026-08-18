@@ -792,6 +792,18 @@ body.admin-mode .logout-link {
   min-width: 0;
 }
 
+.form-section-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0.8rem 0 0.5rem;
+  border-top: 1px dashed var(--border-color);
+  padding-top: 0.7rem;
+  width: 100%;
+}
+
 .admin-form label {
   font-size: 0.75rem;
   font-weight: 700;

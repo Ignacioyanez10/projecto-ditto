@@ -601,10 +601,15 @@ function editProduct(id) {
 
   // Fill form with existing data
   editIdField.value = product.id;
-  document.getElementById('p-name').value = product.name;
-  document.getElementById('p-size').value = product.size;
-  document.getElementById('p-proportions').value = product.proportions;
-  document.getElementById('p-price').value = product.price;
+  document.getElementById('p-name').value = product.name || '';
+  document.getElementById('p-size').value = product.size_main || product.size || '';
+  document.getElementById('p-size-nat').value = product.size_nat || '';
+  document.getElementById('p-waist').value = product.waist || '';
+  document.getElementById('p-rise').value = product.rise || '';
+  document.getElementById('p-length').value = product.length || '';
+  document.getElementById('p-cuff').value = product.cuff || '';
+  document.getElementById('p-proportions').value = product.other_proportions || (product.waist ? '' : product.proportions) || '';
+  document.getElementById('p-price').value = product.price || '';
 
   // Show existing images as tags
   if (product.images && product.images.length > 0) {
@@ -672,11 +677,28 @@ async function toggleSold(id) {
 async function handleAddProduct(e) {
   e.preventDefault();
 
-  const name = document.getElementById('p-name').value;
-  const size = document.getElementById('p-size').value;
-  const proportions = document.getElementById('p-proportions').value;
+  const name = document.getElementById('p-name').value.trim();
+  const sizeMain = document.getElementById('p-size').value.trim();
+  const sizeNat = document.getElementById('p-size-nat').value.trim();
+  const waist = document.getElementById('p-waist').value.trim();
+  const rise = document.getElementById('p-rise').value.trim();
+  const length = document.getElementById('p-length').value.trim();
+  const cuff = document.getElementById('p-cuff').value.trim();
+  const otherProportions = document.getElementById('p-proportions').value.trim();
   const price = parseInt(document.getElementById('p-price').value);
   const editId = editIdField.value;
+
+  // Format combined size
+  const finalSize = sizeNat ? (sizeMain ? `${sizeMain}, ${sizeNat}` : sizeNat) : sizeMain;
+
+  // Format combined proportions
+  const parts = [];
+  if (waist) parts.push(`Cintura: ${waist.toLowerCase().includes('cm') ? waist : waist + ' cm'}`);
+  if (rise) parts.push(`Tiro: ${rise.toLowerCase().includes('cm') ? rise : rise + ' cm'}`);
+  if (length) parts.push(`Largo: ${length.toLowerCase().includes('cm') ? length : length + ' cm'}`);
+  if (cuff) parts.push(`Basta: ${cuff.toLowerCase().includes('cm') ? cuff : cuff + ' cm'}`);
+  if (otherProportions) parts.push(otherProportions);
+  const finalProportions = parts.length > 0 ? parts.join(' | ') : 'Estándar';
 
   // If new files were selected, use them; otherwise keep existing (for edit)
   let finalImages;
@@ -697,10 +719,17 @@ async function handleAddProduct(e) {
     const targetId = parseInt(editId);
     const updatedData = {
       name,
-      size,
-      proportions,
+      size: finalSize,
+      proportions: finalProportions,
       price,
-      images: finalImages
+      images: finalImages,
+      size_main: sizeMain,
+      size_nat: sizeNat,
+      waist,
+      rise,
+      length,
+      cuff,
+      other_proportions: otherProportions
     };
 
     if (isSupabaseConfigured && supabase) {
@@ -721,11 +750,18 @@ async function handleAddProduct(e) {
     const newProduct = {
       id: Date.now(),
       name,
-      size,
-      proportions,
+      size: finalSize,
+      proportions: finalProportions,
       price,
       images: finalImages,
-      isSold: false
+      isSold: false,
+      size_main: sizeMain,
+      size_nat: sizeNat,
+      waist,
+      rise,
+      length,
+      cuff,
+      other_proportions: otherProportions
     };
 
     if (isSupabaseConfigured && supabase) {

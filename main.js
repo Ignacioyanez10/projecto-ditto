@@ -1055,7 +1055,7 @@ async function handleOrderSubmit(e) {
   const total = cart.reduce((sum, item) => sum + item.price, 0);
 
   // Build complete structured purchase form message
-  let message = `📋 FORMULARIO DE COMPRA - DITTO MARKET\n`;
+  let message = `HOLA DITTO\n`;
   message += `════════════════════════════════\n\n`;
   message += `🛍️ PRENDAS SOLICITADAS:\n\n`;
 

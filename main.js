@@ -1066,6 +1066,15 @@ async function handleOrderSubmit(e) {
   message += `• Medio de Pago: Transferencia Bancaria\n\n`;
   message += `¡Hola Ditto! Vengo desde el catálogo web y deseo comprar estas piezas. ¿Me confirmas disponibilidad y datos de transferencia? 🙌`;
 
+  // Visual feedback on the submit button
+  const originalBtnText = orderSubmitBtn ? orderSubmitBtn.innerText : '';
+  if (orderSubmitBtn) {
+    orderSubmitBtn.innerText = '✅ ¡PEDIDO COPIADO! ABRIENDO...';
+    orderSubmitBtn.style.backgroundColor = '#1b5e20';
+    orderSubmitBtn.style.borderColor = '#1b5e20';
+    orderSubmitBtn.style.color = '#ffffff';
+  }
+
   // Copy to clipboard immediately
   try {
     if (navigator.clipboard && window.isSecureContext) {
@@ -1086,9 +1095,44 @@ async function handleOrderSubmit(e) {
     console.warn('Clipboard write fallback:', err);
   }
 
+  // Show floating toast confirmation
+  showToastNotification('📋 ¡Pedido copiado al portapapeles! Pégalo en el chat de Instagram 🙌');
+
   // Open Instagram immediately in direct user interaction context
   window.open('https://ig.me/m/dittomarkett', '_blank');
-  closeOrderModal();
+
+  setTimeout(() => {
+    if (orderSubmitBtn) {
+      orderSubmitBtn.innerText = originalBtnText;
+      orderSubmitBtn.style.backgroundColor = '';
+      orderSubmitBtn.style.borderColor = '';
+      orderSubmitBtn.style.color = '';
+    }
+    closeOrderModal();
+  }, 700);
+}
+
+let toastTimeout = null;
+function showToastNotification(messageText, iconName = 'check_circle', duration = 4500) {
+  let toast = document.getElementById('toast-notification');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast-notification';
+    toast.className = 'toast-notification';
+    document.body.appendChild(toast);
+  }
+
+  toast.innerHTML = `
+    <span class="material-symbols-outlined toast-icon">${iconName}</span>
+    <span>${messageText}</span>
+  `;
+
+  toast.classList.add('active');
+
+  if (toastTimeout) clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toast.classList.remove('active');
+  }, duration);
 }
 
 init();

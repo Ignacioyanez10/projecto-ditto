@@ -609,14 +609,46 @@ function editProduct(id) {
   // Fill form with existing data
   editIdField.value = product.id;
   document.getElementById('p-name').value = product.name || '';
-  document.getElementById('p-size').value = product.size_main || product.size || '';
-  document.getElementById('p-size-nat').value = product.size_nat || '';
-  document.getElementById('p-waist').value = product.waist || '';
-  document.getElementById('p-rise').value = product.rise || '';
-  document.getElementById('p-length').value = product.length || '';
-  document.getElementById('p-cuff').value = product.cuff || '';
-  document.getElementById('p-proportions').value = product.other_proportions || (product.waist ? '' : product.proportions) || '';
   document.getElementById('p-price').value = product.price || '';
+
+  // Parse size
+  if (product.size && product.size.includes(',')) {
+    const [sMain, sNat] = product.size.split(',').map(s => s.trim());
+    document.getElementById('p-size').value = sMain || '';
+    document.getElementById('p-size-nat').value = sNat || '';
+  } else {
+    document.getElementById('p-size').value = product.size || '';
+    document.getElementById('p-size-nat').value = '';
+  }
+
+  // Reset & Parse proportions
+  document.getElementById('p-waist').value = '';
+  document.getElementById('p-rise').value = '';
+  document.getElementById('p-length').value = '';
+  document.getElementById('p-cuff').value = '';
+  document.getElementById('p-proportions').value = '';
+
+  if (product.proportions) {
+    const parts = product.proportions.split('|').map(p => p.trim());
+    const remaining = [];
+    parts.forEach(part => {
+      const lower = part.toLowerCase();
+      if (lower.startsWith('cintura:')) {
+        document.getElementById('p-waist').value = part.replace(/^cintura:\s*/i, '');
+      } else if (lower.startsWith('tiro:')) {
+        document.getElementById('p-rise').value = part.replace(/^tiro:\s*/i, '');
+      } else if (lower.startsWith('largo:')) {
+        document.getElementById('p-length').value = part.replace(/^largo:\s*/i, '');
+      } else if (lower.startsWith('basta:')) {
+        document.getElementById('p-cuff').value = part.replace(/^basta:\s*/i, '');
+      } else {
+        remaining.push(part);
+      }
+    });
+    if (remaining.length > 0) {
+      document.getElementById('p-proportions').value = remaining.join(' | ');
+    }
+  }
 
   // Show existing images as tags
   if (product.images && product.images.length > 0) {
@@ -729,14 +761,7 @@ async function handleAddProduct(e) {
       size: finalSize,
       proportions: finalProportions,
       price,
-      images: finalImages,
-      size_main: sizeMain,
-      size_nat: sizeNat,
-      waist,
-      rise,
-      length,
-      cuff,
-      other_proportions: otherProportions
+      images: finalImages
     };
 
     if (isSupabaseConfigured && supabase) {
@@ -753,7 +778,7 @@ async function handleAddProduct(e) {
       products[idx] = { ...products[idx], ...updatedData };
     }
   } else {
-    // CREATE new product
+    // CREATE new product (only standard DB columns)
     const newProduct = {
       id: Date.now(),
       name,
@@ -761,14 +786,7 @@ async function handleAddProduct(e) {
       proportions: finalProportions,
       price,
       images: finalImages,
-      isSold: false,
-      size_main: sizeMain,
-      size_nat: sizeNat,
-      waist,
-      rise,
-      length,
-      cuff,
-      other_proportions: otherProportions
+      isSold: false
     };
 
     if (isSupabaseConfigured && supabase) {

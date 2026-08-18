@@ -766,8 +766,11 @@ function addToCart(id) {
     saveCart();
     updateCartUI();
     renderProducts();
-    if (!cartSidebar.classList.contains('active')) {
-      toggleCart();
+
+    // Subtle feedback animation on the cart button
+    if (cartToggle) {
+      cartToggle.classList.add('cart-bump');
+      setTimeout(() => cartToggle.classList.remove('cart-bump'), 300);
     }
   }
 }

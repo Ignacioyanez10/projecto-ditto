@@ -1145,3 +1145,20 @@ body.admin-mode .product-admin-actions {
     height: 30px;
   }
 }
+
+/* Cart Bump Animation */
+.cart-bump {
+  animation: cartPulse 0.3s ease-in-out;
+}
+
+@keyframes cartPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

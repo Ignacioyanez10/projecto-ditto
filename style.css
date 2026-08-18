@@ -643,6 +643,65 @@ body.admin-mode .logout-link {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
 }
 
+.order-modal {
+  max-width: 540px;
+}
+
+.order-summary-box {
+  background: #f8f8fa;
+  border: 1px solid var(--border-color);
+  padding: 0.9rem 1.1rem;
+  border-radius: 4px;
+  margin-bottom: 1.2rem;
+  max-height: 180px;
+  overflow-y: auto;
+  font-size: 0.85rem;
+}
+
+.order-summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.45rem 0;
+  border-bottom: 1px dashed var(--border-color);
+}
+
+.order-summary-item:last-child {
+  border-bottom: none;
+}
+
+.order-item-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.order-item-title {
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.order-item-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.order-item-price {
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.order-summary-total {
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1.5px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--text-color);
+}
+
 .admin-modal.active {
   opacity: 1;
   pointer-events: all;

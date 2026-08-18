@@ -71,6 +71,19 @@ const lightboxPrev = document.getElementById('lightbox-prev');
 const lightboxNext = document.getElementById('lightbox-next');
 const lightboxThumbnails = document.getElementById('lightbox-thumbnails');
 
+// Order Form Modal Elements
+const orderModal = document.getElementById('order-modal');
+const orderOverlay = document.getElementById('order-overlay');
+const closeOrderModalBtn = document.getElementById('close-order-modal');
+const orderSummaryBox = document.getElementById('order-summary-box');
+const orderForm = document.getElementById('order-form');
+const orderNameInput = document.getElementById('order-name');
+const orderRutInput = document.getElementById('order-rut');
+const orderPhoneInput = document.getElementById('order-phone');
+const orderCityInput = document.getElementById('order-city');
+const orderAddressInput = document.getElementById('order-address');
+const orderSubmitBtn = document.getElementById('order-submit-btn');
+
 // Admin Elements
 const openAdminBtn = document.getElementById('open-admin-btn');
 const logoutAdminBtn = document.getElementById('logout-admin-btn');
@@ -471,7 +484,12 @@ function setupEventListeners() {
     }
   });
 
-  checkoutBtn.addEventListener('click', handleCheckout);
+  // Order Modal controls
+  closeOrderModalBtn.addEventListener('click', closeOrderModal);
+  orderOverlay.addEventListener('click', closeOrderModal);
+  orderForm.addEventListener('submit', handleOrderSubmit);
+
+  checkoutBtn.addEventListener('click', openOrderModal);
 }
 
 // ================================================================
@@ -720,34 +738,106 @@ function updateCartUI() {
 }
 
 // ================================================================
-// CHECKOUT LOGIC
+// CHECKOUT & INSTAGRAM ORDER FORM
 // ================================================================
-async function handleCheckout() {
+function openOrderModal() {
   if (cart.length === 0) return;
+
+  // Close cart sidebar
+  cartSidebar.classList.remove('active');
+  cartOverlay.classList.remove('active');
+
   const total = cart.reduce((sum, item) => sum + item.price, 0);
 
-  let message = `¡Hola Ditto Market! ✌️\nTe escribo desde la página web porque me interesa comprar lo siguiente:\n\n`;
-  cart.forEach((item) => {
-    message += `👉 ${item.name}\n`;
-    message += `   Talla: ${item.size} | Precio: ${formatPrice(item.price)}\n\n`;
+  // Render product summary in order modal
+  orderSummaryBox.innerHTML = `
+    ${cart.map((item, idx) => `
+      <div class="order-summary-item">
+        <div class="order-item-left">
+          <span class="order-item-title">${idx + 1}. ${item.name}</span>
+          <span class="order-item-sub">Talla: <strong>${item.size}</strong> | Medidas: ${item.proportions}</span>
+        </div>
+        <span class="order-item-price">${formatPrice(item.price)}</span>
+      </div>
+    `).join('')}
+    <div class="order-summary-total">
+      <span>TOTAL DE LA VENTA:</span>
+      <span>${formatPrice(total)}</span>
+    </div>
+  `;
+
+  orderModal.classList.add('active');
+  orderOverlay.classList.add('active');
+}
+
+function closeOrderModal() {
+  orderModal.classList.remove('active');
+  orderOverlay.classList.remove('active');
+}
+
+async function handleOrderSubmit(e) {
+  e.preventDefault();
+  if (cart.length === 0) return;
+
+  const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+  const name = orderNameInput.value.trim() || '____________________';
+  const rut = orderRutInput.value.trim() || '____________________';
+  const phone = orderPhoneInput.value.trim() || '____________________';
+  const city = orderCityInput.value.trim() || '____________________';
+  const address = orderAddressInput.value.trim() || '____________________';
+
+  // Build complete structured purchase form message
+  let message = `📋 FORMULARIO DE COMPRA - DITTO MARKET\n`;
+  message += `════════════════════════════════\n\n`;
+  message += `🛍️ PRENDAS SOLICITADAS:\n\n`;
+
+  cart.forEach((item, index) => {
+    message += `${index + 1}️⃣ ${item.name}\n`;
+    message += `   • Talla: ${item.size}\n`;
+    message += `   • Medidas: ${item.proportions}\n`;
+    message += `   • Valor: ${formatPrice(item.price)}\n\n`;
   });
-  message += `🔹 Total del pedido: ${formatPrice(total)}\n\n`;
-  message += `¿Me confirmas si todavía están disponibles para coordinar el pago? ¡Gracias!`;
+
+  message += `────────────────────────────────\n`;
+  message += `💰 TOTAL DE LA VENTA: ${formatPrice(total)}\n`;
+  message += `────────────────────────────────\n\n`;
+  message += `📦 DATOS DE ENVÍO (STARKEN):\n`;
+  message += `• Nombre Completo: ${name}\n`;
+  message += `• RUT: ${rut}\n`;
+  message += `• Teléfono / WhatsApp: ${phone}\n`;
+  message += `• Ciudad / Comuna: ${city}\n`;
+  message += `• Sucursal Starken o Domicilio: ${address}\n`;
+  message += `• Medio de Pago: Transferencia Bancaria\n\n`;
+  message += `¡Hola Ditto Market! Vengo desde el catálogo web y deseo comprar estas piezas. ¿Me confirmas disponibilidad y datos de transferencia? 🙌`;
 
   try {
     await navigator.clipboard.writeText(message);
-    const originalText = checkoutBtn.innerText;
-    checkoutBtn.innerText = '¡COPIADO! ABRIENDO IG...';
-    checkoutBtn.style.background = '#00aa00';
-    checkoutBtn.style.color = '#fff';
+    const originalText = orderSubmitBtn.innerText;
+    orderSubmitBtn.innerText = '¡PEDIDO COPIADO! ABRIENDO INSTAGRAM...';
+    orderSubmitBtn.style.background = '#008800';
+    orderSubmitBtn.style.borderColor = '#008800';
+    orderSubmitBtn.style.color = '#fff';
+
     setTimeout(() => {
       window.open('https://ig.me/m/dittomarkett', '_blank');
-      checkoutBtn.innerText = originalText;
-      checkoutBtn.style.background = '';
-      checkoutBtn.style.color = '';
-    }, 1500);
+      orderSubmitBtn.innerText = originalText;
+      orderSubmitBtn.style.background = '';
+      orderSubmitBtn.style.borderColor = '';
+      orderSubmitBtn.style.color = '';
+      closeOrderModal();
+    }, 1200);
   } catch (err) {
-    alert('Error al copiar al portapapeles. Intenta manualmente.');
+    // Fallback if clipboard API is blocked
+    const tempTextArea = document.createElement('textarea');
+    tempTextArea.value = message;
+    document.body.appendChild(tempTextArea);
+    tempTextArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempTextArea);
+
+    window.open('https://ig.me/m/dittomarkett', '_blank');
+    closeOrderModal();
   }
 }
 

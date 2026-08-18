@@ -1,195 +1,258 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ditto Market</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    <link rel="stylesheet" href="/style.css">
-  </head>
-  <body>
-    <!-- Top Banner -->
-    <div class="top-banner">
-      <span class="material-symbols-outlined" style="font-size: 1.1rem; margin-right: 5px;">local_shipping</span>
-      ENVÍOS MEDIANTE STARKEN A TODO CHILE
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ditto Market</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+  <!-- Top Banner -->
+  <div class="top-banner">
+    <span class="material-symbols-outlined" style="font-size: 1.1rem; margin-right: 5px;">local_shipping</span>
+    ENVÍOS MEDIANTE STARKEN A TODO CHILE
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo-container">
+      <img src="/images/logo.jpg" alt="Ditto Market Logo" class="logo-img">
+      <span class="logo-text">DITTO MARKET</span>
     </div>
+    <div class="nav-actions">
+      <div class="cart-btn" id="cart-toggle">
+        <span class="material-symbols-outlined">shopping_cart</span>
+        <span class="cart-badge" id="cart-count">0</span>
+      </div>
+    </div>
+  </nav>
 
-    <!-- Navbar -->
-    <nav class="navbar">
-      <div class="logo-container">
-        <img src="/images/logo.jpg" alt="Ditto Market Logo" class="logo-img">
-        <span class="logo-text">DITTO MARKET</span>
-      </div>
-      <div class="nav-actions">
-        <div class="cart-btn" id="cart-toggle">
-          <span class="material-symbols-outlined">shopping_cart</span>
-          <span class="cart-badge" id="cart-count">0</span>
-        </div>
-      </div>
-    </nav>
+  <!-- Hero Section -->
+  <header class="hero">
+    <div class="hero-content">
+      <h1>DITTO<br>MARKET</h1>
+      <p>Vintage · Streetwear · Piezas seleccionadas</p>
+      <button class="btn-primary" id="scroll-to-shop">[ VER CATÁLOGO ]</button>
+    </div>
+  </header>
 
-    <!-- Hero Section -->
-    <header class="hero">
-      <div class="hero-content">
-        <h1>DITTO<br>MARKET</h1>
-        <p>Vintage · Streetwear · Piezas seleccionadas</p>
-        <button class="btn-primary" id="scroll-to-shop">[ VER CATÁLOGO ]</button>
-      </div>
-    </header>
+  <!-- Product Grid -->
+  <main class="shop-section" id="shop">
+    <div class="section-header">
+      <h2>ÚLTIMO DROP</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="product-grid" id="product-grid">
+      <!-- Injected by JS -->
+    </div>
+  </main>
 
-    <!-- Product Grid -->
-    <main class="shop-section" id="shop">
-      <div class="section-header">
-        <h2>ÚLTIMO DROP</h2>
-        <div class="divider"></div>
-      </div>
-      <div class="product-grid" id="product-grid">
-        <!-- Injected by JS -->
-      </div>
-    </main>
+  <footer class="footer">
+    <p>© 2026 Ditto Market · <a href="https://www.instagram.com/dittomarkett/" target="_blank" rel="noopener noreferrer"
+        class="footer-ig">@dittomarkett</a></p>
+    <div class="footer-admin-actions">
+      <button id="open-admin-btn" class="admin-link">[ ADMIN PANEL ]</button>
+      <button id="logout-admin-btn" class="logout-link">[ CERRAR SESIÓN ]</button>
+    </div>
+  </footer>
 
-    <footer class="footer">
-      <p>© 2026 Ditto Market · <a href="https://www.instagram.com/dittomarkett/" target="_blank" rel="noopener noreferrer" class="footer-ig">@dittomarkett</a></p>
-      <div class="footer-admin-actions">
-        <button id="open-admin-btn" class="admin-link">[ ADMIN PANEL ]</button>
-        <button id="logout-admin-btn" class="logout-link">[ CERRAR SESIÓN ]</button>
+  <!-- Cart Sidebar -->
+  <div class="cart-sidebar" id="cart-sidebar">
+    <div class="cart-header">
+      <h2>[ BOLSA ]</h2>
+      <button class="close-cart" id="close-cart">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="cart-items" id="cart-items">
+      <div class="empty-cart-msg">Vacío.</div>
+    </div>
+    <div class="cart-footer">
+      <div class="cart-total">
+        <span>TOTAL</span>
+        <span id="cart-total-price">$0</span>
       </div>
-    </footer>
+      <button class="btn-primary checkout-btn" id="checkout-btn" disabled>
+        [ PEDIR POR DM ]
+      </button>
+      <p class="checkout-hint">Tu pedido se copiará para enviarlo por Instagram.</p>
+    </div>
+  </div>
+  <div class="cart-overlay" id="cart-overlay"></div>
 
-    <!-- Cart Sidebar -->
-    <div class="cart-sidebar" id="cart-sidebar">
-      <div class="cart-header">
-        <h2>[ BOLSA ]</h2>
-        <button class="close-cart" id="close-cart">
+  <!-- Order Form Modal (Formulario de Pedido para Instagram) -->
+  <div class="admin-modal order-modal" id="order-modal">
+    <div class="admin-content">
+      <div class="admin-header">
+        <h2>
+          <span class="material-symbols-outlined login-icon">receipt_long</span>
+          [ FORMULARIO DE COMPRA ]
+        </h2>
+        <button class="close-admin" id="close-order-modal" type="button">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
-      <div class="cart-items" id="cart-items">
-        <div class="empty-cart-msg">Vacío.</div>
+
+      <div class="order-summary-box" id="order-summary-box">
+        <!-- Injected by JS: Products, Sizes, Prices, Total -->
       </div>
-      <div class="cart-footer">
-        <div class="cart-total">
-          <span>TOTAL</span>
-          <span id="cart-total-price">$0</span>
+
+      <form id="order-form" class="admin-form">
+        <p class="login-subtitle">Tus datos de envío para Starken (opcional):</p>
+        
+        <div class="form-group">
+          <label for="order-name">Nombre Completo:</label>
+          <input type="text" id="order-name" placeholder="Ej: Ignacio Yáñez">
         </div>
-        <button class="btn-primary checkout-btn" id="checkout-btn" disabled>
-          [ PEDIR POR DM ]
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="order-rut">RUT:</label>
+            <input type="text" id="order-rut" placeholder="Ej: 19.876.543-2">
+          </div>
+          <div class="form-group">
+            <label for="order-phone">Teléfono / WhatsApp:</label>
+            <input type="tel" id="order-phone" placeholder="Ej: +56 9 1234 5678">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="order-city">Ciudad / Comuna:</label>
+            <input type="text" id="order-city" placeholder="Ej: Concepción">
+          </div>
+          <div class="form-group">
+            <label for="order-address">Sucursal Starken o Domicilio:</label>
+            <input type="text" id="order-address" placeholder="Ej: Sucursal Starken Centro">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary" id="order-submit-btn" style="width: 100%; margin-top: 1rem;">
+          [ COPIAR PEDIDO Y ABRIR INSTAGRAM ]
         </button>
-        <p class="checkout-hint">Tu pedido se copiará para enviarlo por Instagram.</p>
-      </div>
+        <p class="checkout-hint">Se copiará el formulario detallado al portapapeles y se abrirá el DM de Instagram para enviarlo.</p>
+      </form>
     </div>
-    <div class="cart-overlay" id="cart-overlay"></div>
+  </div>
+  <div class="cart-overlay" id="order-overlay"></div>
 
-    <!-- Admin Login Modal -->
-    <div class="admin-modal" id="login-modal">
-      <div class="admin-content">
-        <div class="admin-header">
-          <h2>
-            <span class="material-symbols-outlined login-icon">lock</span>
-            [ ADMIN LOGIN ]
-          </h2>
-          <button class="close-admin" id="close-login" type="button">
-            <span class="material-symbols-outlined">close</span>
-          </button>
+  <!-- Admin Login Modal -->
+  <div class="admin-modal" id="login-modal">
+    <div class="admin-content">
+      <div class="admin-header">
+        <h2>
+          <span class="material-symbols-outlined login-icon">lock</span>
+          [ ADMIN LOGIN ]
+        </h2>
+        <button class="close-admin" id="close-login" type="button">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <form id="login-form" class="admin-form">
+        <p class="login-subtitle">Acceso restringido al panel de administración.</p>
+        <div class="form-group">
+          <label for="login-user">Usuario:</label>
+          <input type="text" id="login-user" required placeholder="Ej: ditto" autocomplete="username">
         </div>
-        <form id="login-form" class="admin-form">
-          <p class="login-subtitle">Acceso restringido al panel de administración.</p>
-          <div class="form-group">
-            <label for="login-user">Usuario:</label>
-            <input type="text" id="login-user" required placeholder="Ej: ditto" autocomplete="username">
-          </div>
-          <div class="form-group">
-            <label for="login-pass">Contraseña:</label>
-            <input type="password" id="login-pass" required placeholder="••••••••" autocomplete="current-password">
-          </div>
-          <p class="login-error" id="login-error" hidden>Credenciales incorrectas. Intenta de nuevo.</p>
-          <button type="submit" class="btn-primary login-submit-btn">[ INICIAR SESIÓN ]</button>
-        </form>
-      </div>
-    </div>
-    <div class="cart-overlay" id="login-overlay"></div>
-
-    <!-- Admin Modal -->
-    <div class="admin-modal" id="admin-modal">
-      <div class="admin-content">
-        <div class="admin-header">
-          <h2 id="admin-title">[ AGREGAR PRODUCTO ]</h2>
-          <button class="close-admin" id="close-admin"><span class="material-symbols-outlined">close</span></button>
+        <div class="form-group">
+          <label for="login-pass">Contraseña:</label>
+          <input type="password" id="login-pass" required placeholder="••••••••" autocomplete="current-password">
         </div>
-        <form id="add-product-form" class="admin-form">
-          <input type="hidden" id="p-edit-id" value="">
-          <div class="form-group">
-            <label>Nombre del Producto:</label>
-            <input type="text" id="p-name" required placeholder="Ej: Polerón Y2K">
-          </div>
-          <div class="form-group">
-            <label>Imágenes de tu PC (Selecciona una o varias):</label>
-            <div class="file-upload-wrapper">
-              <input type="file" id="p-images" multiple accept="image/*" class="file-input">
-              <div class="file-upload-btn">[ SELECCIONAR FOTOS ]</div>
-            </div>
-            <div id="file-name-display" class="file-name-display">Ningún archivo seleccionado</div>
-            <small>Las imágenes se comprimirán automáticamente.</small>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Talla:</label>
-              <input type="text" id="p-size" required placeholder="Ej: L">
-            </div>
-            <div class="form-group">
-              <label>Medidas (cm):</label>
-              <input type="text" id="p-proportions" required placeholder="Ej: 70x55">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Precio (CLP):</label>
-            <input type="number" id="p-price" required placeholder="Ej: 25000">
-          </div>
-          <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;" id="admin-submit-btn">[ GUARDAR EN CATÁLOGO ]</button>
-        </form>
-      </div>
+        <p class="login-error" id="login-error" hidden>Credenciales incorrectas. Intenta de nuevo.</p>
+        <button type="submit" class="btn-primary login-submit-btn">[ INICIAR SESIÓN ]</button>
+      </form>
     </div>
-    <div class="cart-overlay" id="admin-overlay"></div>
+  </div>
+  <div class="cart-overlay" id="login-overlay"></div>
 
-    <!-- Image Lightbox Modal -->
-    <div class="lightbox-modal" id="lightbox-modal" aria-hidden="true" role="dialog">
-      <button class="lightbox-close" id="lightbox-close" aria-label="Cerrar vista grande">
-        <span class="material-symbols-outlined">close</span>
+  <!-- Admin Modal -->
+  <div class="admin-modal" id="admin-modal">
+    <div class="admin-content">
+      <div class="admin-header">
+        <h2 id="admin-title">[ AGREGAR PRODUCTO ]</h2>
+        <button class="close-admin" id="close-admin"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <form id="add-product-form" class="admin-form">
+        <input type="hidden" id="p-edit-id" value="">
+        <div class="form-group">
+          <label>Nombre del Producto:</label>
+          <input type="text" id="p-name" required placeholder="Ej: Polerón Y2K">
+        </div>
+        <div class="form-group">
+          <label>Imágenes de tu PC (Selecciona una o varias):</label>
+          <div class="file-upload-wrapper">
+            <input type="file" id="p-images" multiple accept="image/*" class="file-input">
+            <div class="file-upload-btn">[ SELECCIONAR FOTOS ]</div>
+          </div>
+          <div id="file-name-display" class="file-name-display">Ningún archivo seleccionado</div>
+          <small>Las imágenes se comprimirán automáticamente.</small>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Talla:</label>
+            <input type="text" id="p-size" required placeholder="Ej: L">
+          </div>
+          <div class="form-group">
+            <label>Medidas (cm):</label>
+            <input type="text" id="p-proportions"placeholder="Ej: 70x55">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Precio (CLP):</label>
+          <input type="number" id="p-price" required placeholder="Ej: 25000">
+        </div>
+        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;" id="admin-submit-btn">[ GUARDAR
+          EN CATÁLOGO ]</button>
+      </form>
+    </div>
+  </div>
+  <div class="cart-overlay" id="admin-overlay"></div>
+
+  <!-- Image Lightbox Modal -->
+  <div class="lightbox-modal" id="lightbox-modal" aria-hidden="true" role="dialog">
+    <button class="lightbox-close" id="lightbox-close" aria-label="Cerrar vista grande">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+
+    <div class="lightbox-wrapper">
+      <button class="lightbox-nav-btn prev" id="lightbox-prev" aria-label="Foto anterior">
+        <span class="material-symbols-outlined">chevron_left</span>
       </button>
 
-      <div class="lightbox-wrapper">
-        <button class="lightbox-nav-btn prev" id="lightbox-prev" aria-label="Foto anterior">
-          <span class="material-symbols-outlined">chevron_left</span>
-        </button>
+      <div class="lightbox-main-view">
+        <img src="" alt="" id="lightbox-img" class="lightbox-img">
 
-        <div class="lightbox-main-view">
-          <img src="" alt="" id="lightbox-img" class="lightbox-img">
-          
-          <div class="lightbox-info-bar">
-            <div class="lightbox-details">
-              <h3 id="lightbox-title" class="lightbox-title"></h3>
-              <div class="lightbox-meta">
-                <span id="lightbox-size" class="lightbox-size"></span>
-                <span id="lightbox-price" class="lightbox-price"></span>
-              </div>
+        <div class="lightbox-info-bar">
+          <div class="lightbox-details">
+            <h3 id="lightbox-title" class="lightbox-title"></h3>
+            <div class="lightbox-meta">
+              <span id="lightbox-size" class="lightbox-size"></span>
+              <span id="lightbox-price" class="lightbox-price"></span>
             </div>
-            <div class="lightbox-counter" id="lightbox-counter">1 / 1</div>
           </div>
+          <div class="lightbox-counter" id="lightbox-counter">1 / 1</div>
         </div>
-
-        <button class="lightbox-nav-btn next" id="lightbox-next" aria-label="Foto siguiente">
-          <span class="material-symbols-outlined">chevron_right</span>
-        </button>
       </div>
 
-      <div class="lightbox-thumbnails" id="lightbox-thumbnails"></div>
+      <button class="lightbox-nav-btn next" id="lightbox-next" aria-label="Foto siguiente">
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
     </div>
-    <div class="cart-overlay" id="lightbox-overlay"></div>
 
-    <script type="module" src="/main.js"></script>
-  </body>
+    <div class="lightbox-thumbnails" id="lightbox-thumbnails"></div>
+  </div>
+  <div class="cart-overlay" id="lightbox-overlay"></div>
+
+  <script type="module" src="/main.js"></script>
+</body>
+
 </html>

@@ -624,27 +624,30 @@ body.admin-mode .logout-link {
   margin-top: 0.8rem;
 }
 
-/* Admin Modals (Login & Product Management) */
+/* Admin & Order Modals */
 .admin-modal {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) scale(0.95);
-  width: 90%;
+  width: 92%;
   max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
   background: #ffffff;
   border: 1px solid var(--border-color);
   border-radius: 4px;
   z-index: 1000;
-  padding: 2rem;
+  padding: 1.8rem;
   opacity: 0;
   pointer-events: none;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  box-sizing: border-box;
 }
 
 .order-modal {
-  max-width: 540px;
+  max-width: 520px;
 }
 
 .order-summary-box {
@@ -653,9 +656,10 @@ body.admin-mode .logout-link {
   padding: 0.9rem 1.1rem;
   border-radius: 4px;
   margin-bottom: 1.2rem;
-  max-height: 180px;
+  max-height: 160px;
   overflow-y: auto;
   font-size: 0.85rem;
+  box-sizing: border-box;
 }
 
 .order-summary-item {
@@ -712,9 +716,9 @@ body.admin-mode .logout-link {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.2rem;
   border-bottom: 1px solid var(--border-color);
-  padding-bottom: 1rem;
+  padding-bottom: 0.8rem;
 }
 
 .admin-header h2 {
@@ -724,6 +728,7 @@ body.admin-mode .logout-link {
   align-items: center;
   gap: 0.5rem;
   color: var(--text-color);
+  font-size: 1.25rem;
 }
 
 .close-admin {
@@ -731,6 +736,10 @@ body.admin-mode .logout-link {
   border: none;
   color: var(--text-color);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
 }
 
 .login-icon {
@@ -743,6 +752,7 @@ body.admin-mode .logout-link {
   color: var(--text-muted);
   margin-bottom: 1.2rem;
   text-transform: uppercase;
+  line-height: 1.35;
 }
 
 .login-error {
@@ -759,24 +769,31 @@ body.admin-mode .logout-link {
   margin-top: 1rem;
 }
 
+.admin-form, .admin-form * {
+  box-sizing: border-box;
+}
+
 .admin-form .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 0.9rem;
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
+  width: 100%;
 }
 
 .admin-form .form-row {
   display: flex;
-  gap: 1rem;
+  gap: 0.8rem;
+  width: 100%;
 }
 
 .admin-form .form-row .form-group {
   flex: 1;
+  min-width: 0;
 }
 
 .admin-form label {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-color);
   text-transform: uppercase;
@@ -786,16 +803,32 @@ body.admin-mode .logout-link {
   background: #f8f8fa;
   border: 1.5px solid var(--border-color);
   color: var(--text-color);
-  padding: 0.8rem;
+  padding: 0.75rem 0.8rem;
   font-family: var(--font-main);
   font-size: 0.9rem;
   border-radius: 2px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s, background-color 0.2s;
 }
 
 .admin-form input:focus {
   outline: none;
   border-color: #111111;
   background: #ffffff;
+}
+
+.admin-form input.input-error {
+  border-color: #e53935 !important;
+  background-color: #fff8f8 !important;
+}
+
+.field-error-msg {
+  color: #e53935;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 2px;
+  display: block;
 }
 
 .admin-form small {
@@ -1102,6 +1135,25 @@ body.admin-mode .product-admin-actions {
 
 /* Mobile Responsive */
 @media (max-width: 650px) {
+  .admin-modal {
+    padding: 1.25rem 1rem;
+    width: 95%;
+    max-height: 92vh;
+    border-radius: 4px;
+  }
+
+  .admin-form .form-row {
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .order-summary-box {
+    max-height: 130px;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.8rem;
+    margin-bottom: 0.9rem;
+  }
+
   .lightbox-modal {
     padding: 1rem 0.8rem;
     width: 96%;

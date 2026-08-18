@@ -860,18 +860,150 @@ function closeOrderModal() {
   orderOverlay.classList.remove('active');
 }
 
+// ================================================================
+// FORM VALIDATIONS & HELPERS
+// ================================================================
+function validateChileanRut(rutStr) {
+  const clean = rutStr.replace(/[^0-9kK]/g, '').toUpperCase();
+  if (clean.length < 7 || clean.length > 9) return false;
+  const body = clean.slice(0, -1);
+  const dv = clean.slice(-1);
+  let sum = 0;
+  let multiplier = 2;
+  for (let i = body.length - 1; i >= 0; i--) {
+    sum += parseInt(body[i]) * multiplier;
+    multiplier = multiplier === 7 ? 2 : multiplier + 1;
+  }
+  const expected = 11 - (sum % 11);
+  const calculatedDv = expected === 11 ? '0' : expected === 10 ? 'K' : expected.toString();
+  return dv === calculatedDv;
+}
+
+function formatRut(rutStr) {
+  const clean = rutStr.replace(/[^0-9kK]/g, '').toUpperCase();
+  if (clean.length < 2) return clean;
+  const body = clean.slice(0, -1);
+  const dv = clean.slice(-1);
+  // Format body with dots
+  let formattedBody = '';
+  for (let i = body.length - 1, j = 1; i >= 0; i--, j++) {
+    formattedBody = body[i] + formattedBody;
+    if (j % 3 === 0 && i !== 0) formattedBody = '.' + formattedBody;
+  }
+  return `${formattedBody}-${dv}`;
+}
+
+function validateEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
+}
+
+function validatePhone(phone) {
+  const clean = phone.replace(/[^0-9+]/g, '');
+  // Chilean format: +569XXXXXXXX, 9XXXXXXXX, or 8-9 digits
+  return clean.length >= 8 && clean.length <= 13;
+}
+
+function showFieldError(inputElement, message) {
+  if (!inputElement) return;
+  inputElement.classList.add('input-error');
+  const parent = inputElement.closest('.form-group') || inputElement.parentElement;
+  let errorElem = parent.querySelector('.field-error-msg');
+  if (!errorElem) {
+    errorElem = document.createElement('span');
+    errorElem.className = 'field-error-msg';
+    parent.appendChild(errorElem);
+  }
+  errorElem.textContent = message;
+}
+
+function clearFieldErrors() {
+  if (!orderForm) return;
+  orderForm.querySelectorAll('.input-error').forEach(input => input.classList.remove('input-error'));
+  orderForm.querySelectorAll('.field-error-msg').forEach(msg => msg.remove());
+}
+
+// Live error clearance on typing
+if (orderForm) {
+  orderForm.addEventListener('input', (e) => {
+    if (e.target && e.target.classList.contains('input-error')) {
+      e.target.classList.remove('input-error');
+      const parent = e.target.closest('.form-group') || e.target.parentElement;
+      const errorElem = parent?.querySelector('.field-error-msg');
+      if (errorElem) errorElem.remove();
+    }
+  });
+
+  // Auto-format RUT field on blur/input
+  if (orderRutInput) {
+    orderRutInput.addEventListener('blur', (e) => {
+      const val = e.target.value.trim();
+      if (val.length >= 7) {
+        e.target.value = formatRut(val);
+      }
+    });
+  }
+}
+
 async function handleOrderSubmit(e) {
   e.preventDefault();
   if (cart.length === 0) return;
 
-  const total = cart.reduce((sum, item) => sum + item.price, 0);
+  clearFieldErrors();
 
-  const name = (orderNameInput && orderNameInput.value.trim()) || 'No especificado';
-  const email = (orderEmailInput && orderEmailInput.value.trim()) || 'No especificado';
-  const rut = (orderRutInput && orderRutInput.value.trim()) || 'No especificado';
-  const phone = (orderPhoneInput && orderPhoneInput.value.trim()) || 'No especificado';
-  const city = (orderCityInput && orderCityInput.value.trim()) || 'No especificado';
-  const address = (orderAddressInput && orderAddressInput.value.trim()) || 'No especificado';
+  const nameVal = (orderNameInput && orderNameInput.value.trim()) || '';
+  const emailVal = (orderEmailInput && orderEmailInput.value.trim()) || '';
+  const rutVal = (orderRutInput && orderRutInput.value.trim()) || '';
+  const phoneVal = (orderPhoneInput && orderPhoneInput.value.trim()) || '';
+  const cityVal = (orderCityInput && orderCityInput.value.trim()) || '';
+  const addressVal = (orderAddressInput && orderAddressInput.value.trim()) || '';
+
+  let hasErrors = false;
+
+  // 1. Name validation
+  if (!nameVal || nameVal.length < 3) {
+    showFieldError(orderNameInput, 'Ingresa tu nombre y apellido');
+    hasErrors = true;
+  }
+
+  // 2. Email validation
+  if (!emailVal || !validateEmail(emailVal)) {
+    showFieldError(orderEmailInput, 'Ingresa un correo electrónico válido (ej: nombre@gmail.com)');
+    hasErrors = true;
+  }
+
+  // 3. RUT validation
+  if (!rutVal || !validateChileanRut(rutVal)) {
+    showFieldError(orderRutInput, 'Ingresa un RUT chileno válido (ej: 12.345.678-9)');
+    hasErrors = true;
+  }
+
+  // 4. Phone validation
+  if (!phoneVal || !validatePhone(phoneVal)) {
+    showFieldError(orderPhoneInput, 'Ingresa un teléfono o WhatsApp válido (ej: +56 9 1234 5678)');
+    hasErrors = true;
+  }
+
+  // 5. City validation
+  if (!cityVal || cityVal.length < 3) {
+    showFieldError(orderCityInput, 'Ingresa tu ciudad o comuna');
+    hasErrors = true;
+  }
+
+  // 6. Address validation
+  if (!addressVal || addressVal.length < 4) {
+    showFieldError(orderAddressInput, 'Ingresa tu dirección completa o sucursal Starken');
+    hasErrors = true;
+  }
+
+  if (hasErrors) {
+    // Focus first invalid input
+    const firstInvalid = orderForm.querySelector('.input-error');
+    if (firstInvalid) firstInvalid.focus();
+    return;
+  }
+
+  const formattedRut = formatRut(rutVal);
+  const total = cart.reduce((sum, item) => sum + item.price, 0);
 
   // Build complete structured purchase form message
   let message = `📋 FORMULARIO DE COMPRA - DITTO MARKET\n`;
@@ -889,14 +1021,14 @@ async function handleOrderSubmit(e) {
   message += `💰 TOTAL DE LA VENTA: ${formatPrice(total)}\n`;
   message += `────────────────────────────────\n\n`;
   message += `📦 DATOS DE ENVÍO (STARKEN):\n`;
-  message += `• Nombre Completo: ${name}\n`;
-  message += `• Correo Electrónico: ${email}\n`;
-  message += `• RUT: ${rut}\n`;
-  message += `• Teléfono / WhatsApp: ${phone}\n`;
-  message += `• Ciudad / Comuna: ${city}\n`;
-  message += `• Sucursal Starken o Domicilio: ${address}\n`;
+  message += `• Nombre Completo: ${nameVal}\n`;
+  message += `• Correo Electrónico: ${emailVal}\n`;
+  message += `• RUT: ${formattedRut}\n`;
+  message += `• Teléfono / WhatsApp: ${phoneVal}\n`;
+  message += `• Ciudad / Comuna: ${cityVal}\n`;
+  message += `• Sucursal Starken o Domicilio: ${addressVal}\n`;
   message += `• Medio de Pago: Transferencia Bancaria\n\n`;
-  message += `¡Hola Ditto Market! Vengo desde el catálogo web y deseo comprar estas piezas. ¿Me confirmas disponibilidad y datos de transferencia? 🙌`;
+  message += `¡Hola Ditto! Vengo desde el catálogo web y deseo comprar estas piezas. ¿Me confirmas disponibilidad y datos de transferencia? 🙌`;
 
   // Copy to clipboard immediately
   try {
@@ -924,3 +1056,4 @@ async function handleOrderSubmit(e) {
 }
 
 init();
+

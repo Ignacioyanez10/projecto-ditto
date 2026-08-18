@@ -267,10 +267,12 @@ function renderProducts() {
 
       <div class="product-info">
         <h3 class="product-title">${product.name}</h3>
-        <div class="product-details">
-          <span>Talla: <strong>${product.size}</strong></span>
-          <span>Medidas: <strong>${product.proportions}</strong></span>
-        </div>
+        ${(product.size || product.proportions) ? `
+          <div class="product-details">
+            ${product.size ? `<span>Talla: <strong>${product.size}</strong></span>` : ''}
+            ${product.proportions ? `<span>Medidas: <strong>${product.proportions}</strong></span>` : ''}
+          </div>
+        ` : ''}
         <span class="product-price">${formatPrice(product.price)}</span>
         <button class="add-to-cart" data-id="${product.id}" ${isDisabled ? 'disabled' : ''} style="${isInCart ? 'border-color: var(--accent-color); color: var(--accent-color);' : ''}">
           ${btnText}
@@ -347,7 +349,12 @@ function updateLightboxUI() {
   lightboxImg.src = currentImgSrc;
   lightboxImg.alt = `${product.name} - Foto ${idx + 1}`;
   lightboxTitle.textContent = product.name;
-  lightboxSize.innerHTML = `Talla: <strong>${product.size}</strong> (${product.proportions})`;
+  
+  const metaParts = [];
+  if (product.size && product.size.trim()) metaParts.push(`Talla: <strong>${product.size.trim()}</strong>`);
+  if (product.proportions && product.proportions.trim()) metaParts.push(`(${product.proportions.trim()})`);
+  lightboxSize.innerHTML = metaParts.join(' ');
+
   lightboxPrice.textContent = formatPrice(product.price);
 
   if (images.length > 1) {
@@ -698,7 +705,7 @@ async function handleAddProduct(e) {
   if (length) parts.push(`Largo: ${length.toLowerCase().includes('cm') ? length : length + ' cm'}`);
   if (cuff) parts.push(`Basta: ${cuff.toLowerCase().includes('cm') ? cuff : cuff + ' cm'}`);
   if (otherProportions) parts.push(otherProportions);
-  const finalProportions = parts.length > 0 ? parts.join(' | ') : 'Estándar';
+  const finalProportions = parts.length > 0 ? parts.join(' | ') : '';
 
   // If new files were selected, use them; otherwise keep existing (for edit)
   let finalImages;
@@ -872,15 +879,21 @@ function openOrderModal() {
 
   // Render product summary in order modal
   orderSummaryBox.innerHTML = `
-    ${cart.map((item, idx) => `
-      <div class="order-summary-item">
-        <div class="order-item-left">
-          <span class="order-item-title">${idx + 1}. ${item.name}</span>
-          <span class="order-item-sub">Talla: <strong>${item.size}</strong> | Medidas: ${item.proportions}</span>
+    ${cart.map((item, idx) => {
+      const details = [];
+      if (item.size && item.size.trim()) details.push(`Talla: <strong>${item.size.trim()}</strong>`);
+      if (item.proportions && item.proportions.trim()) details.push(`Medidas: ${item.proportions.trim()}`);
+      const subText = details.join(' | ');
+      return `
+        <div class="order-summary-item">
+          <div class="order-item-left">
+            <span class="order-item-title">${idx + 1}. ${item.name}</span>
+            ${subText ? `<span class="order-item-sub">${subText}</span>` : ''}
+          </div>
+          <span class="order-item-price">${formatPrice(item.price)}</span>
         </div>
-        <span class="order-item-price">${formatPrice(item.price)}</span>
-      </div>
-    `).join('')}
+      `;
+    }).join('')}
     <div class="order-summary-total">
       <span>TOTAL DE LA VENTA:</span>
       <span>${formatPrice(total)}</span>
@@ -1048,8 +1061,12 @@ async function handleOrderSubmit(e) {
 
   cart.forEach((item, index) => {
     message += `${index + 1}️⃣ ${item.name}\n`;
-    message += `   • Talla: ${item.size}\n`;
-    message += `   • Medidas: ${item.proportions}\n`;
+    if (item.size && item.size.trim()) {
+      message += `   • Talla: ${item.size.trim()}\n`;
+    }
+    if (item.proportions && item.proportions.trim()) {
+      message += `   • Medidas: ${item.proportions.trim()}\n`;
+    }
     message += `   • Valor: ${formatPrice(item.price)}\n\n`;
   });
 

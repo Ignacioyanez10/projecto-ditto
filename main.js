@@ -79,6 +79,7 @@ const closeOrderModalBtn = document.getElementById('close-order-modal');
 const orderSummaryBox = document.getElementById('order-summary-box');
 const orderForm = document.getElementById('order-form');
 const orderNameInput = document.getElementById('order-name');
+const orderEmailInput = document.getElementById('order-email');
 const orderRutInput = document.getElementById('order-rut');
 const orderPhoneInput = document.getElementById('order-phone');
 const orderCityInput = document.getElementById('order-city');
@@ -866,6 +867,7 @@ async function handleOrderSubmit(e) {
   const total = cart.reduce((sum, item) => sum + item.price, 0);
 
   const name = (orderNameInput && orderNameInput.value.trim()) || 'No especificado';
+  const email = (orderEmailInput && orderEmailInput.value.trim()) || 'No especificado';
   const rut = (orderRutInput && orderRutInput.value.trim()) || 'No especificado';
   const phone = (orderPhoneInput && orderPhoneInput.value.trim()) || 'No especificado';
   const city = (orderCityInput && orderCityInput.value.trim()) || 'No especificado';
@@ -888,6 +890,7 @@ async function handleOrderSubmit(e) {
   message += `────────────────────────────────\n\n`;
   message += `📦 DATOS DE ENVÍO (STARKEN):\n`;
   message += `• Nombre Completo: ${name}\n`;
+  message += `• Correo Electrónico: ${email}\n`;
   message += `• RUT: ${rut}\n`;
   message += `• Teléfono / WhatsApp: ${phone}\n`;
   message += `• Ciudad / Comuna: ${city}\n`;

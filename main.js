@@ -12,6 +12,7 @@ const ADMIN_PASS = '1234';
 const PRODUCT_CATEGORIES = [
   { id: 'all', label: 'Todos' },
   { id: 'poleras', label: 'Poleras' },
+  { id: 'polerones', label: 'Polerones' },
   { id: 'pantalones', label: 'Pantalones' },
   { id: 'chaquetas', label: 'Chaquetas' },
   { id: 'calzado', label: 'Calzado' },

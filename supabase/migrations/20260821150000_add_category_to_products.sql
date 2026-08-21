@@ -21,6 +21,7 @@ ALTER TABLE public.products
   ADD CONSTRAINT products_category_check
   CHECK (category IN (
     'poleras',
+    'polerones',
     'pantalones',
     'chaquetas',
     'calzado',
@@ -29,4 +30,4 @@ ALTER TABLE public.products
   ));
 
 COMMENT ON COLUMN public.products.category IS
-  'Categoría del producto para filtros del catálogo (poleras, pantalones, chaquetas, calzado, accesorios, otro)';
+  'Categoría del producto para filtros del catálogo (poleras, polerones, pantalones, chaquetas, calzado, accesorios, otro)';

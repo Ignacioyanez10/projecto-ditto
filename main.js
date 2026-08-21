@@ -561,6 +561,12 @@ function setupEventListeners() {
   // Admin form submit
   addProductForm.addEventListener('submit', handleAddProduct);
 
+  // Talla: obligatoria solo para categorías de ropa (no para accesorios/otro)
+  const categorySelect = document.getElementById('p-category');
+  if (categorySelect) {
+    categorySelect.addEventListener('change', updateSizeFieldRequired);
+  }
+
   scrollBtn.addEventListener('click', () => {
     document.getElementById('shop').scrollIntoView({ behavior: 'smooth' });
   });
@@ -696,6 +702,7 @@ function openAdminForNew() {
   adminSubmitBtn.textContent = '[ GUARDAR EN CATÁLOGO ]';
   adminModal.classList.add('active');
   adminOverlay.classList.add('active');
+  updateSizeFieldRequired();
 }
 
 function closeAdmin() {
@@ -774,6 +781,27 @@ function editProduct(id) {
   adminSubmitBtn.textContent = '[ ACTUALIZAR PRODUCTO ]';
   adminModal.classList.add('active');
   adminOverlay.classList.add('active');
+  updateSizeFieldRequired();
+}
+
+function updateSizeFieldRequired() {
+  const categorySelect = document.getElementById('p-category');
+  const sizeInput = document.getElementById('p-size');
+  const sizeLabel = document.getElementById('p-size-label');
+  if (!categorySelect || !sizeInput) return;
+
+  const noSizeCategories = ['accesorios', 'otro'];
+  const isOptional = noSizeCategories.includes(categorySelect.value);
+
+  sizeInput.required = !isOptional;
+  if (sizeLabel) {
+    sizeLabel.textContent = isOptional
+      ? 'Talla / Dimensiones (Opcional):'
+      : 'Talla Principal / US:';
+  }
+  sizeInput.placeholder = isOptional
+    ? 'Ej: Talla única, 30cm, etc.'
+    : 'Ej: 32x32 US o L';
 }
 
 async function deleteProduct(id) {

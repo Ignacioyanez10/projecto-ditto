@@ -1322,14 +1322,14 @@ async function handleOrderSubmit(e) {
   // Visual feedback on the submit button
   const originalBtnText = orderSubmitBtn ? orderSubmitBtn.innerText : '';
   if (orderSubmitBtn) {
-    orderSubmitBtn.innerText = '✅ ¡PEDIDO COPIADO! ABRIENDO EN 1.5s...';
+    orderSubmitBtn.innerText = '✅ ¡PEDIDO COPIADO! ABRIENDO INSTAGRAM...';
     orderSubmitBtn.style.backgroundColor = '#1b5e20';
     orderSubmitBtn.style.borderColor = '#1b5e20';
     orderSubmitBtn.style.color = '#ffffff';
     orderSubmitBtn.disabled = true;
   }
 
-  // Copy to clipboard immediately
+  // Copy to clipboard
   try {
     if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(message);
@@ -1349,13 +1349,36 @@ async function handleOrderSubmit(e) {
     console.warn('Clipboard write fallback:', err);
   }
 
-  // Show floating toast confirmation
-  showToastNotification('📋 ¡Pedido copiado al portapapeles! Abriendo Instagram... 🙌', 'content_paste_go', 5000);
+  showToastNotification('📋 ¡Pedido copiado! Abriendo Instagram... 🙌', 'content_paste_go', 5000);
 
-  // Wait 1.5 seconds (1500ms) before opening Instagram and closing modal
+  // ── Abrir Instagram ──────────────────────────────────────────────
+  // IMPORTANTE: se ejecuta dentro del event handler (gesto de usuario)
+  // para que iOS y Android no lo bloqueen como popup.
+  // Intentamos el deep link de la app; si falla en 1.5s, abrimos web.
+  const igDeepLink  = 'instagram://user?username=dittomarkett';
+  const igWebLink   = 'https://www.instagram.com/dittomarkett/';
+
+  const isIOS     = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isAndroid = /android/i.test(navigator.userAgent);
+
+  if (isIOS || isAndroid) {
+    // Intentar abrir la app nativa
+    window.location.href = igDeepLink;
+
+    // Si la app no está instalada, redirigir a la web después de 1.5 s
+    setTimeout(() => {
+      // Si el documento sigue visible, la app no se abrió → abrir web
+      if (!document.hidden) {
+        window.open(igWebLink, '_blank');
+      }
+    }, 1500);
+  } else {
+    // Desktop: abrir en nueva pestaña normalmente
+    window.open(igWebLink, '_blank');
+  }
+
+  // Restaurar botón y cerrar modal
   setTimeout(() => {
-    window.open('https://ig.me/m/dittomarkett', '_blank');
-
     if (orderSubmitBtn) {
       orderSubmitBtn.innerText = originalBtnText;
       orderSubmitBtn.style.backgroundColor = '';

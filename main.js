@@ -229,8 +229,9 @@ function renderImagePreviews() {
 // ================================================================
 async function init() {
   loadViewPreferences();
-  loadCart();
-  await loadCatalog();
+  await loadCatalog();   // productos primero
+  loadCart();            // carrito después (necesita el catálogo para validar)
+  restoreAdminSession(); // restaurar sesión de admin si estaba activa
   renderCategoryFilters();
   applyGridColumns();
   setupEventListeners();
@@ -746,6 +747,7 @@ function handleLogin(e) {
   if (user === ADMIN_USER && pass === ADMIN_PASS) {
     document.body.classList.add('admin-mode');
     openAdminBtn.textContent = '[ + AGREGAR PRODUCTO ]';
+    sessionStorage.setItem('ditto_admin', '1'); // persistir sesión
     closeLoginModal();
     renderProducts();
     return;
@@ -759,6 +761,12 @@ function handleLogin(e) {
 // ================================================================
 // ADMIN LOGIC
 // ================================================================
+function restoreAdminSession() {
+  if (sessionStorage.getItem('ditto_admin') === '1') {
+    document.body.classList.add('admin-mode');
+    openAdminBtn.textContent = '[ + AGREGAR PRODUCTO ]';
+  }
+}
 function openAdminForNew() {
   // Reset form for adding a new product
   editIdField.value = '';
@@ -783,6 +791,7 @@ function closeAdmin() {
 function logoutAdmin() {
   document.body.classList.remove('admin-mode');
   openAdminBtn.textContent = '[ ADMIN PANEL ]';
+  sessionStorage.removeItem('ditto_admin'); // limpiar sesión guardada
   closeAdmin();
   closeLoginModal();
   renderProducts();

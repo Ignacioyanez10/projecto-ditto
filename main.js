@@ -1319,7 +1319,7 @@ async function handleOrderSubmit(e) {
   message += `• Medio de Pago: Transferencia Bancaria\n\n`;
   message += `¡Hola Ditto! Vengo desde el catálogo web y deseo comprar estas piezas. ¿Me confirmas disponibilidad y datos de transferencia? 🙌`;
 
-  // Visual feedback on the submit button
+  // Visual feedback en el botón
   const originalBtnText = orderSubmitBtn ? orderSubmitBtn.innerText : '';
   if (orderSubmitBtn) {
     orderSubmitBtn.innerText = '✅ ¡PEDIDO COPIADO! ABRIENDO INSTAGRAM...';
@@ -1329,7 +1329,18 @@ async function handleOrderSubmit(e) {
     orderSubmitBtn.disabled = true;
   }
 
-  // Copy to clipboard
+  // ── Abrir Instagram DM ────────────────────────────────────────────
+  // DEBE ir ANTES de cualquier "await" — iOS Safari bloquea window.open
+  // si no está directamente en el stack del gesto del usuario.
+  // ig.me/m/USERNAME es el enlace oficial de Instagram para abrir DM.
+  const igDMUrl = 'https://ig.me/m/dittomarkett';
+  const igWindow = window.open(igDMUrl, '_blank');
+  // Si el navegador bloqueó la nueva pestaña (algunos Android), navegar aquí
+  if (!igWindow) {
+    window.location.href = igDMUrl;
+  }
+
+  // ── Copiar al portapapeles (async va después de abrir la ventana) ──
   try {
     if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(message);
@@ -1349,33 +1360,7 @@ async function handleOrderSubmit(e) {
     console.warn('Clipboard write fallback:', err);
   }
 
-  showToastNotification('📋 ¡Pedido copiado! Abriendo Instagram... 🙌', 'content_paste_go', 5000);
-
-  // ── Abrir Instagram ──────────────────────────────────────────────
-  // IMPORTANTE: se ejecuta dentro del event handler (gesto de usuario)
-  // para que iOS y Android no lo bloqueen como popup.
-  // Intentamos el deep link de la app; si falla en 1.5s, abrimos web.
-  const igDeepLink  = 'instagram://user?username=dittomarkett';
-  const igWebLink   = 'https://www.instagram.com/dittomarkett/';
-
-  const isIOS     = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const isAndroid = /android/i.test(navigator.userAgent);
-
-  if (isIOS || isAndroid) {
-    // Intentar abrir la app nativa
-    window.location.href = igDeepLink;
-
-    // Si la app no está instalada, redirigir a la web después de 1.5 s
-    setTimeout(() => {
-      // Si el documento sigue visible, la app no se abrió → abrir web
-      if (!document.hidden) {
-        window.open(igWebLink, '_blank');
-      }
-    }, 1500);
-  } else {
-    // Desktop: abrir en nueva pestaña normalmente
-    window.open(igWebLink, '_blank');
-  }
+  showToastNotification('📋 ¡Pedido copiado! Pégalo en el chat de Instagram 🙌', 'content_paste_go', 6000);
 
   // Restaurar botón y cerrar modal
   setTimeout(() => {

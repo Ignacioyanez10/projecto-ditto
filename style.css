@@ -1389,3 +1389,31 @@ body.admin-mode .product-admin-actions {
   font-size: 1.3rem;
   color: #4caf50;
 }
+
+/* ============================================================
+   RESPONSIVE – MOBILE
+   ============================================================ */
+@media (max-width: 640px) {
+  /* Forzar 2 columnas en el catálogo sin importar la selección del usuario */
+  .product-grid.grid-cols-2,
+  .product-grid.grid-cols-3,
+  .product-grid.grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  /* Ocultar selector de columnas en móvil (no tiene sentido con 2 fijas) */
+  .grid-size-control {
+    display: none;
+  }
+
+  /* Reducir padding lateral de la sección */
+  .shop-section {
+    padding: 2rem 3%;
+  }
+
+  /* Reducir tamaño de info en la card para que quepan bien */
+  .product-card .product-info {
+    padding: 0.6rem 0.7rem;
+  }
+}

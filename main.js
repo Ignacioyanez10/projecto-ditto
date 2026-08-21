@@ -501,6 +501,18 @@ function updateLightboxUI() {
 
   lightboxPrice.textContent = formatPrice(product.price);
 
+  // Description (only shown if present)
+  const lightboxDesc = document.getElementById('lightbox-description');
+  if (lightboxDesc) {
+    if (product.description && product.description.trim()) {
+      lightboxDesc.textContent = product.description.trim();
+      lightboxDesc.style.display = 'block';
+    } else {
+      lightboxDesc.textContent = '';
+      lightboxDesc.style.display = 'none';
+    }
+  }
+
   if (images.length > 1) {
     lightboxCounter.style.display = 'block';
     lightboxCounter.textContent = `${idx + 1} / ${images.length}`;
@@ -784,6 +796,7 @@ function editProduct(id) {
   editIdField.value = product.id;
   document.getElementById('p-name').value = product.name || '';
   document.getElementById('p-category').value = normalizeCategory(product.category);
+  document.getElementById('p-description').value = product.description || '';
   document.getElementById('p-price').value = product.price || '';
 
   // Parse size
@@ -914,6 +927,7 @@ async function handleAddProduct(e) {
 
   const name = document.getElementById('p-name').value.trim();
   const category = normalizeCategory(document.getElementById('p-category').value);
+  const description = document.getElementById('p-description').value.trim();
   const sizeMain = document.getElementById('p-size').value.trim();
   const sizeNat = document.getElementById('p-size-nat').value.trim();
   const waist = document.getElementById('p-waist').value.trim();
@@ -956,6 +970,7 @@ async function handleAddProduct(e) {
     const updatedData = {
       name,
       category,
+      description,
       size: finalSize,
       proportions: finalProportions,
       price,
@@ -981,6 +996,7 @@ async function handleAddProduct(e) {
       id: Date.now(),
       name,
       category,
+      description,
       size: finalSize,
       proportions: finalProportions,
       price,
@@ -1003,6 +1019,9 @@ async function handleAddProduct(e) {
   saveCatalog();
   addProductForm.reset();
   fileNameDisplay.textContent = 'Ningún archivo seleccionado';
+  fileNameDisplay.style.display = '';
+  const postSaveGrid = document.getElementById('image-preview-grid');
+  if (postSaveGrid) { postSaveGrid.innerHTML = ''; postSaveGrid.style.display = 'none'; }
   pendingImages = [];
   editIdField.value = '';
   closeAdmin();

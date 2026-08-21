@@ -261,6 +261,12 @@
         </div>
 
         <div class="form-group">
+          <label for="p-description">Descripción del Producto (Opcional):</label>
+          <textarea id="p-description" rows="3" placeholder="Ej: Chaqueta vintage en muy buen estado, detalles en los botones..."
+            style="resize: vertical; width: 100%; font-family: var(--font-main); font-size: 0.85rem; padding: 0.75rem 0.8rem; border: 1.5px solid var(--border-color); border-radius: 2px; background: #f8f8fa; box-sizing: border-box;"></textarea>
+        </div>
+
+        <div class="form-group">
           <label for="p-price">Precio (CLP):</label>
           <input type="number" id="p-price" required placeholder="Ej: 25000">
         </div>
@@ -292,6 +298,7 @@
               <span id="lightbox-size" class="lightbox-size"></span>
               <span id="lightbox-price" class="lightbox-price"></span>
             </div>
+            <p id="lightbox-description" class="lightbox-description"></p>
           </div>
           <div class="lightbox-counter" id="lightbox-counter">1 / 1</div>
         </div>

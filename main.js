@@ -129,9 +129,9 @@ const loginError = document.getElementById('login-error');
 const closeLoginBtn = document.getElementById('close-login');
 
 // ================================================================
-// IMAGE COMPRESSION
+// IMAGE COMPRESSION & PREVIEW
 // ================================================================
-function compressImage(file, maxWidth = 600, quality = 0.7) {
+function compressImage(file, maxWidth = 900, quality = 0.82) {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -152,8 +152,8 @@ function compressImage(file, maxWidth = 600, quality = 0.7) {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, w, h);
 
-        // Export as JPEG Base64
-        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        // Export as WebP Base64 (lighter than JPEG for web)
+        const dataUrl = canvas.toDataURL('image/webp', quality);
         resolve(dataUrl);
       };
       img.src = e.target.result;
@@ -166,6 +166,62 @@ async function processSelectedFiles(files) {
   pendingImages = [];
   const promises = Array.from(files).map(f => compressImage(f));
   pendingImages = await Promise.all(promises);
+  renderImagePreviews();
+}
+
+function renderImagePreviews() {
+  const container = document.getElementById('image-preview-grid');
+  const placeholder = document.getElementById('file-name-display');
+  if (!container) return;
+
+  if (pendingImages.length === 0) {
+    container.innerHTML = '';
+    container.style.display = 'none';
+    if (placeholder) placeholder.textContent = 'Ningún archivo seleccionado';
+    return;
+  }
+
+  if (placeholder) placeholder.style.display = 'none';
+  container.style.display = 'grid';
+
+  container.innerHTML = pendingImages.map((src, i) => `
+    <div class="img-preview-item" data-index="${i}">
+      <img src="${src}" alt="Vista previa ${i + 1}" class="img-preview-thumb">
+      <div class="img-preview-badge">${i + 1}</div>
+      <div class="img-preview-actions">
+        <button type="button" class="img-prev-btn" data-index="${i}" title="Mover antes" ${i === 0 ? 'disabled' : ''}>
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <button type="button" class="img-remove-btn" data-index="${i}" title="Eliminar">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+        <button type="button" class="img-next-btn" data-index="${i}" title="Mover después" ${i === pendingImages.length - 1 ? 'disabled' : ''}>
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  // Event delegation on the preview grid
+  container.onclick = (e) => {
+    const prevBtn = e.target.closest('.img-prev-btn');
+    const nextBtn = e.target.closest('.img-next-btn');
+    const removeBtn = e.target.closest('.img-remove-btn');
+
+    if (prevBtn && !prevBtn.disabled) {
+      const idx = parseInt(prevBtn.getAttribute('data-index'));
+      [pendingImages[idx - 1], pendingImages[idx]] = [pendingImages[idx], pendingImages[idx - 1]];
+      renderImagePreviews();
+    } else if (nextBtn && !nextBtn.disabled) {
+      const idx = parseInt(nextBtn.getAttribute('data-index'));
+      [pendingImages[idx], pendingImages[idx + 1]] = [pendingImages[idx + 1], pendingImages[idx]];
+      renderImagePreviews();
+    } else if (removeBtn) {
+      const idx = parseInt(removeBtn.getAttribute('data-index'));
+      pendingImages.splice(idx, 1);
+      renderImagePreviews();
+    }
+  };
 }
 
 // ================================================================
@@ -542,19 +598,18 @@ function setupEventListeners() {
   loginOverlay.addEventListener('click', closeLoginModal);
   loginForm.addEventListener('submit', handleLogin);
 
-  // File input: show selected filenames
+  // File input: compress to WebP, show previews with reorder controls
   fileInput.addEventListener('change', async () => {
     const files = fileInput.files;
+    const previewGrid = document.getElementById('image-preview-grid');
     if (files.length === 0) {
-      fileNameDisplay.textContent = 'Ningún archivo seleccionado';
       pendingImages = [];
+      if (fileNameDisplay) fileNameDisplay.textContent = 'Ningún archivo seleccionado';
+      if (previewGrid) { previewGrid.innerHTML = ''; previewGrid.style.display = 'none'; }
       return;
     }
-    // Show file names
-    const names = Array.from(files).map(f => f.name);
-    fileNameDisplay.innerHTML = names.map(n => `<span class="file-tag">${n}</span>`).join('');
-
-    // Compress and store
+    if (fileNameDisplay) fileNameDisplay.style.display = 'none';
+    // Compress all to WebP and show previews
     await processSelectedFiles(files);
   });
 
@@ -697,6 +752,9 @@ function openAdminForNew() {
   editIdField.value = '';
   addProductForm.reset();
   fileNameDisplay.textContent = 'Ningún archivo seleccionado';
+  fileNameDisplay.style.display = '';
+  const previewGrid = document.getElementById('image-preview-grid');
+  if (previewGrid) { previewGrid.innerHTML = ''; previewGrid.style.display = 'none'; }
   pendingImages = [];
   adminTitle.textContent = '[ AGREGAR PRODUCTO ]';
   adminSubmitBtn.textContent = '[ GUARDAR EN CATÁLOGO ]';

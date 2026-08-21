@@ -51,7 +51,16 @@
       <center><h2>CATALOGO</h2></center>
       <div class="divider"></div>
     </div>
-    <div class="product-grid" id="product-grid">
+    <div class="shop-toolbar">
+      <div class="category-filters" id="category-filters" aria-label="Filtrar por categoría"></div>
+      <div class="grid-size-control" aria-label="Productos por fila">
+        <span class="toolbar-label">Ver:</span>
+        <button type="button" class="grid-size-btn" data-cols="4" aria-pressed="false">4</button>
+        <button type="button" class="grid-size-btn" data-cols="3" aria-pressed="false">3</button>
+        <button type="button" class="grid-size-btn" data-cols="2" aria-pressed="false">2</button>
+      </div>
+    </div>
+    <div class="product-grid grid-cols-4" id="product-grid">
       <!-- Injected by JS -->
     </div>
   </main>
@@ -174,8 +183,19 @@
       <form id="add-product-form" class="admin-form">
         <input type="hidden" id="p-edit-id" value="">
         <div class="form-group">
-          <label>Nombre del Producto:</label>
+          <label for="p-name">Nombre del Producto:</label>
           <input type="text" id="p-name" required placeholder="Ej: Polerón Y2K">
+        </div>
+        <div class="form-group">
+          <label for="p-category">Categoría:</label>
+          <select id="p-category" required>
+            <option value="poleras">Poleras</option>
+            <option value="pantalones">Pantalones</option>
+            <option value="chaquetas">Chaquetas</option>
+            <option value="calzado">Calzado</option>
+            <option value="accesorios">Accesorios</option>
+            <option value="otro">Otros</option>
+          </select>
         </div>
         <div class="form-group">
           <label>Imágenes de tu PC (Selecciona una o varias):</label>

@@ -9,11 +9,24 @@ const ADMIN_USER = 'ditto';
 const ADMIN_PASS = '1234';
 // ============================================================
 
+const PRODUCT_CATEGORIES = [
+  { id: 'all', label: 'Todos' },
+  { id: 'poleras', label: 'Poleras' },
+  { id: 'pantalones', label: 'Pantalones' },
+  { id: 'chaquetas', label: 'Chaquetas' },
+  { id: 'calzado', label: 'Calzado' },
+  { id: 'accesorios', label: 'Accesorios' },
+  { id: 'otro', label: 'Otros' }
+];
+
+const VALID_CATEGORY_IDS = PRODUCT_CATEGORIES.filter(c => c.id !== 'all').map(c => c.id);
+
 // Default initial catalog (used only the first time)
 const defaultProducts = [
   {
     id: 1,
     name: 'Vintage Carhartt Detroit Jacket',
+    category: 'chaquetas',
     size: 'L',
     proportions: '68x62 cm',
     price: 75000,
@@ -23,6 +36,7 @@ const defaultProducts = [
   {
     id: 2,
     name: 'Pantalón Parachute Y2K Faded',
+    category: 'pantalones',
     size: '34x32',
     proportions: '44cm cintura',
     price: 45000,
@@ -32,6 +46,7 @@ const defaultProducts = [
   {
     id: 3,
     name: 'Polera Gráfica Bandas 90s',
+    category: 'poleras',
     size: 'XL',
     proportions: '75x58 cm',
     price: 25000,
@@ -46,9 +61,13 @@ let cart = [];
 let carouselState = {};
 let pendingImages = []; // Stores Base64 images from file selector
 let currentLightbox = { productId: null, imageIndex: 0 };
+let activeCategory = 'all';
+let gridColumns = 4;
 
 // DOM Elements
 const productGrid = document.getElementById('product-grid');
+const categoryFilters = document.getElementById('category-filters');
+const gridSizeButtons = document.querySelectorAll('.grid-size-btn');
 const cartToggle = document.getElementById('cart-toggle');
 const closeCart = document.getElementById('close-cart');
 const cartSidebar = document.getElementById('cart-sidebar');
@@ -152,10 +171,61 @@ async function processSelectedFiles(files) {
 // INITIALIZE
 // ================================================================
 async function init() {
+  loadViewPreferences();
   loadCart();
   await loadCatalog();
+  renderCategoryFilters();
+  applyGridColumns();
   setupEventListeners();
   setupRealtime();
+}
+
+function loadViewPreferences() {
+  const savedCategory = localStorage.getItem('ditto_category_filter');
+  const savedCols = localStorage.getItem('ditto_grid_columns');
+  if (savedCategory && (savedCategory === 'all' || VALID_CATEGORY_IDS.includes(savedCategory))) {
+    activeCategory = savedCategory;
+  }
+  const cols = parseInt(savedCols, 10);
+  if ([2, 3, 4].includes(cols)) {
+    gridColumns = cols;
+  }
+}
+
+function normalizeCategory(category) {
+  return VALID_CATEGORY_IDS.includes(category) ? category : 'otro';
+}
+
+function getCategoryLabel(categoryId) {
+  const match = PRODUCT_CATEGORIES.find(c => c.id === categoryId);
+  return match ? match.label : 'Otros';
+}
+
+function getFilteredProducts() {
+  if (activeCategory === 'all') return products;
+  return products.filter(product => normalizeCategory(product.category) === activeCategory);
+}
+
+function applyGridColumns() {
+  productGrid.classList.remove('grid-cols-2', 'grid-cols-3', 'grid-cols-4');
+  productGrid.classList.add(`grid-cols-${gridColumns}`);
+  gridSizeButtons.forEach(btn => {
+    const isActive = parseInt(btn.getAttribute('data-cols'), 10) === gridColumns;
+    btn.classList.toggle('active', isActive);
+    btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  });
+}
+
+function renderCategoryFilters() {
+  if (!categoryFilters) return;
+  categoryFilters.innerHTML = PRODUCT_CATEGORIES.map(({ id, label }) => `
+    <button
+      type="button"
+      class="category-filter-btn ${activeCategory === id ? 'active' : ''}"
+      data-category="${id}"
+      aria-pressed="${activeCategory === id ? 'true' : 'false'}"
+    >${label}</button>
+  `).join('');
 }
 
 function setupRealtime() {
@@ -186,14 +256,20 @@ async function loadCatalog(skipLocalSeed = false) {
       if (error) throw error;
 
       if (data && data.length > 0) {
-        products = data;
+        products = data.map(product => ({
+          ...product,
+          category: normalizeCategory(product.category)
+        }));
         renderProducts();
         return;
       } else if (!skipLocalSeed) {
         // If DB is empty, check if we have local items or default products to migrate
         const saved = localStorage.getItem('ditto_catalog');
         const initial = saved ? JSON.parse(saved) : defaultProducts;
-        products = initial;
+        products = initial.map(product => ({
+          ...product,
+          category: normalizeCategory(product.category)
+        }));
         renderProducts();
         return;
       }
@@ -205,7 +281,10 @@ async function loadCatalog(skipLocalSeed = false) {
   // Fallback to localStorage
   const saved = localStorage.getItem('ditto_catalog');
   if (saved) {
-    products = JSON.parse(saved);
+    products = JSON.parse(saved).map(product => ({
+      ...product,
+      category: normalizeCategory(product.category)
+    }));
   } else {
     products = [...defaultProducts];
     saveCatalog();
@@ -225,12 +304,19 @@ function saveCatalog() {
 // RENDER PRODUCTS & CAROUSEL
 // ================================================================
 function renderProducts() {
+  const visibleProducts = getFilteredProducts();
+
   if (products.length === 0) {
-    productGrid.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1 / -1;">No hay productos aún. Usa el panel de admin para agregar.</p>';
+    productGrid.innerHTML = '<p class="empty-grid-msg">No hay productos aún. Usa el panel de admin para agregar.</p>';
     return;
   }
 
-  productGrid.innerHTML = products.map(product => {
+  if (visibleProducts.length === 0) {
+    productGrid.innerHTML = `<p class="empty-grid-msg">No hay productos en "${getCategoryLabel(activeCategory)}".</p>`;
+    return;
+  }
+
+  productGrid.innerHTML = visibleProducts.map(product => {
     if (carouselState[product.id] === undefined) {
       carouselState[product.id] = 0;
     }
@@ -266,6 +352,7 @@ function renderProducts() {
       </div>
 
       <div class="product-info">
+        <span class="product-category">${getCategoryLabel(normalizeCategory(product.category))}</span>
         <h3 class="product-title">${product.name}</h3>
         ${(product.size || product.proportions) ? `
           <div class="product-details">
@@ -477,6 +564,27 @@ function setupEventListeners() {
     document.getElementById('shop').scrollIntoView({ behavior: 'smooth' });
   });
 
+  if (categoryFilters) {
+    categoryFilters.addEventListener('click', (e) => {
+      const btn = e.target.closest('.category-filter-btn');
+      if (!btn) return;
+      activeCategory = btn.getAttribute('data-category') || 'all';
+      localStorage.setItem('ditto_category_filter', activeCategory);
+      renderCategoryFilters();
+      renderProducts();
+    });
+  }
+
+  gridSizeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cols = parseInt(btn.getAttribute('data-cols'), 10);
+      if (![2, 3, 4].includes(cols)) return;
+      gridColumns = cols;
+      localStorage.setItem('ditto_grid_columns', String(gridColumns));
+      applyGridColumns();
+    });
+  });
+
   // Product Grid interactions
   productGrid.addEventListener('click', (e) => {
     const target = e.target;
@@ -609,6 +717,7 @@ function editProduct(id) {
   // Fill form with existing data
   editIdField.value = product.id;
   document.getElementById('p-name').value = product.name || '';
+  document.getElementById('p-category').value = normalizeCategory(product.category);
   document.getElementById('p-price').value = product.price || '';
 
   // Parse size
@@ -717,6 +826,7 @@ async function handleAddProduct(e) {
   e.preventDefault();
 
   const name = document.getElementById('p-name').value.trim();
+  const category = normalizeCategory(document.getElementById('p-category').value);
   const sizeMain = document.getElementById('p-size').value.trim();
   const sizeNat = document.getElementById('p-size-nat').value.trim();
   const waist = document.getElementById('p-waist').value.trim();
@@ -758,6 +868,7 @@ async function handleAddProduct(e) {
     const targetId = parseInt(editId);
     const updatedData = {
       name,
+      category,
       size: finalSize,
       proportions: finalProportions,
       price,
@@ -782,6 +893,7 @@ async function handleAddProduct(e) {
     const newProduct = {
       id: Date.now(),
       name,
+      category,
       size: finalSize,
       proportions: finalProportions,
       price,

@@ -84,6 +84,8 @@ export const STARKEN_BRANCHES = [
   // NUBLE
   { name: 'Starken Chillan', city: 'Chillan', address: 'Av. Arauco 541, Chillan', lat: -36.6064, lng: -72.1034 },
   { name: 'Starken San Carlos', city: 'San Carlos', address: 'Olla 450, San Carlos', lat: -36.4250, lng: -71.9567 },
+  { name: 'Starken El Carmen (Agencia)', city: 'El Carmen', address: 'Baquedano 345, El Carmen', lat: -36.852, lng: -72.031 },
+  { name: 'Starken San Ignacio (Agencia)', city: 'San Ignacio', address: 'Manuel Antonio Matta 450, San Ignacio', lat: -36.791, lng: -72.022 },
   // BIO-BIO
   { name: 'Starken Concepcion Caupolican', city: 'Concepcion', address: 'Caupolican 521, Concepcion', lat: -36.8270, lng: -73.0498 },
   { name: 'Starken Concepcion Collao', city: 'Concepcion', address: 'Av. Collao 1200, Concepcion', lat: -36.8183, lng: -73.0134 },

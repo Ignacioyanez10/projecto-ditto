@@ -892,25 +892,16 @@ function buildPopupContent(branch) {
 function selectStarkenBranch(branch) {
   selectedStarkenBranch = branch;
 
-  // Update chip display
-  const placeholder = document.getElementById('starken-placeholder');
-  const chip = document.getElementById('starken-chip');
-  const chipName = document.getElementById('starken-chip-name');
-  const chipAddress = document.getElementById('starken-chip-address');
-  const hiddenInput = document.getElementById('order-address-starken');
-
-  if (placeholder) placeholder.style.display = 'none';
-  if (chip) chip.style.display = 'flex';
-  if (chipName) chipName.textContent = branch.name;
-  if (chipAddress) chipAddress.textContent = branch.address;
-  if (hiddenInput) hiddenInput.value = `${branch.name} - ${branch.address}`;
+  const addressInput = document.getElementById('order-address-starken');
+  if (addressInput) {
+    addressInput.value = `${branch.name} - ${branch.address}`;
+    addressInput.classList.remove('input-error');
+  }
 
   // Clear any error state
   const sucursalGroup = document.getElementById('sucursal-group');
   if (sucursalGroup) {
     sucursalGroup.querySelectorAll('.field-error-msg').forEach(el => el.remove());
-    const display = document.getElementById('starken-selected-display');
-    if (display) display.classList.remove('input-error');
   }
 
   closeStarkenMapModal();
@@ -1584,21 +1575,8 @@ async function handleOrderSubmit(e) {
 
   // 6. Address / Starken branch validation
   if (deliveryMode === 'sucursal') {
-    if (!addressVal) {
-      const display = document.getElementById('starken-selected-display');
-      if (display) {
-        display.classList.add('input-error');
-        const sucursalGroup = document.getElementById('sucursal-group');
-        if (sucursalGroup) {
-          let errorElem = sucursalGroup.querySelector('.field-error-msg');
-          if (!errorElem) {
-            errorElem = document.createElement('span');
-            errorElem.className = 'field-error-msg';
-            sucursalGroup.appendChild(errorElem);
-          }
-          errorElem.textContent = 'Selecciona una sucursal Starken en el mapa';
-        }
-      }
+    if (!addressVal || addressVal.length < 4) {
+      showFieldError(orderAddressStarkenInput, 'Ingresa el nombre o dirección de la sucursal Starken');
       hasErrors = true;
     }
   } else {

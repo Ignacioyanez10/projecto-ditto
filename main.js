@@ -1,5 +1,6 @@
 import './style.css';
 import { supabase, isSupabaseConfigured } from './src/supabase.js';
+import { STARKEN_BRANCHES } from './src/data/starkenBranches.js';
 
 // ============================================================
 // CONFIGURACIÓN DEL ADMINISTRADOR
@@ -114,78 +115,8 @@ let selectedStarkenBranch = null;
 // ================================================================
 // STARKEN BRANCHES DATA
 // ================================================================
-const STARKEN_BRANCHES = [
-  // REGION METROPOLITANA
-  { name: 'Starken Santiago Centro', city: 'Santiago', address: 'Monjitas 392, Santiago', lat: -33.4372, lng: -70.6506 },
-  { name: 'Starken Providencia', city: 'Providencia', address: 'Av. Providencia 1991, Providencia', lat: -33.4292, lng: -70.6108 },
-  { name: 'Starken Las Condes', city: 'Las Condes', address: 'Av. Apoquindo 4800, Las Condes', lat: -33.4117, lng: -70.5750 },
-  { name: 'Starken Nunoa', city: 'Nunoa', address: 'Av. Irarrazaval 1890, Nunoa', lat: -33.4572, lng: -70.6102 },
-  { name: 'Starken La Florida', city: 'La Florida', address: 'Av. Vicuna Mackenna 7700, La Florida', lat: -33.5253, lng: -70.5944 },
-  { name: 'Starken Maipu', city: 'Maipu', address: 'Av. Pajaritos 3939, Maipu', lat: -33.5139, lng: -70.7678 },
-  { name: 'Starken Pudahuel', city: 'Pudahuel', address: 'Av. El Sol 670, Pudahuel', lat: -33.4406, lng: -70.7555 },
-  { name: 'Starken Quilicura', city: 'Quilicura', address: 'Av. Manuel Antonio Matta 1855, Quilicura', lat: -33.3656, lng: -70.7303 },
-  { name: 'Starken San Bernardo', city: 'San Bernardo', address: 'Av. Presidente Alessandri 4001, San Bernardo', lat: -33.5943, lng: -70.6997 },
-  { name: 'Starken Puente Alto', city: 'Puente Alto', address: 'Av. Concha y Toro 1055, Puente Alto', lat: -33.6109, lng: -70.5763 },
-  { name: 'Starken Penalolen', city: 'Penalolen', address: 'Av. Grecia 7801, Penalolen', lat: -33.4809, lng: -70.5480 },
-  { name: 'Starken Recoleta', city: 'Recoleta', address: 'Av. Recoleta 2345, Recoleta', lat: -33.4006, lng: -70.6398 },
-  { name: 'Starken Estacion Central', city: 'Estacion Central', address: 'Av. Alameda 3242, Estacion Central', lat: -33.4548, lng: -70.6839 },
-  { name: 'Starken La Cisterna', city: 'La Cisterna', address: 'Av. Lo Ovalle 1235, La Cisterna', lat: -33.5318, lng: -70.6626 },
-  { name: 'Starken Renca', city: 'Renca', address: 'Av. Eduardo Frei 6220, Renca', lat: -33.4044, lng: -70.7266 },
-  { name: 'Starken Penaflor', city: 'Penaflor', address: 'Av. Bernardo OHiggins 691, Penaflor', lat: -33.6144, lng: -70.8814 },
-  { name: 'Starken Melipilla', city: 'Melipilla', address: 'Av. OHiggins 520, Melipilla', lat: -33.6886, lng: -71.2137 },
-  // VALPARAISO / VINA
-  { name: 'Starken Valparaiso', city: 'Valparaiso', address: 'Av. Argentina 68, Valparaiso', lat: -33.0453, lng: -71.6205 },
-  { name: 'Starken Vina del Mar', city: 'Vina del Mar', address: 'Av. Libertad 770, Vina del Mar', lat: -33.0245, lng: -71.5518 },
-  { name: 'Starken Quilpue', city: 'Quilpue', address: 'Av. Los Carrera 600, Quilpue', lat: -33.0480, lng: -71.4428 },
-  { name: 'Starken Villa Alemana', city: 'Villa Alemana', address: 'Av. Vina del Mar 95, Villa Alemana', lat: -33.0420, lng: -71.3742 },
-  { name: 'Starken San Antonio', city: 'San Antonio', address: 'Av. Barros Luco 30, San Antonio', lat: -33.5936, lng: -71.6202 },
-  { name: 'Starken La Calera', city: 'La Calera', address: 'Av. Latorre 1510, La Calera', lat: -32.7887, lng: -71.1982 },
-  { name: 'Starken Los Andes', city: 'Los Andes', address: 'Av. Santa Rosa 285, Los Andes', lat: -32.8350, lng: -70.5983 },
-  // OHIGGINS
-  { name: 'Starken Rancagua', city: 'Rancagua', address: 'Av. Espana 660, Rancagua', lat: -34.1703, lng: -70.7444 },
-  { name: 'Starken San Fernando', city: 'San Fernando', address: 'Manso de Velasco 980, San Fernando', lat: -34.5853, lng: -70.9899 },
-  // MAULE
-  { name: 'Starken Talca', city: 'Talca', address: 'Av. Las Heras 190, Talca', lat: -35.4264, lng: -71.6554 },
-  { name: 'Starken Curico', city: 'Curico', address: 'Pena 730, Curico', lat: -34.9853, lng: -71.2390 },
-  { name: 'Starken Linares', city: 'Linares', address: 'Av. Valentin Letelier 575, Linares', lat: -35.8459, lng: -71.5960 },
-  // NUBLE / BIO-BIO
-  { name: 'Starken Chillan', city: 'Chillan', address: 'Av. Arauco 541, Chillan', lat: -36.6064, lng: -72.1034 },
-  { name: 'Starken Concepcion', city: 'Concepcion', address: 'Caupolican 521, Concepcion', lat: -36.8270, lng: -73.0498 },
-  { name: 'Starken Talcahuano', city: 'Talcahuano', address: 'Av. Colon 550, Talcahuano', lat: -36.7242, lng: -73.1174 },
-  { name: 'Starken Coronel', city: 'Coronel', address: 'Av. Alessandri 1200, Coronel', lat: -37.0268, lng: -73.1501 },
-  { name: 'Starken Los Angeles', city: 'Los Angeles', address: 'Av. Ricardo Vicuna 301, Los Angeles', lat: -37.4702, lng: -72.3536 },
-  // ARAUCANIA
-  { name: 'Starken Temuco', city: 'Temuco', address: 'Av. Balmaceda 755, Temuco', lat: -38.7359, lng: -72.5904 },
-  { name: 'Starken Villarrica', city: 'Villarrica', address: 'Av. Pedro de Valdivia 950, Villarrica', lat: -39.2847, lng: -72.2282 },
-  { name: 'Starken Pucon', city: 'Pucon', address: 'Av. OHiggins 190, Pucon', lat: -39.2722, lng: -71.9801 },
-  { name: 'Starken Angol', city: 'Angol', address: 'Av. Lautaro 290, Angol', lat: -37.7961, lng: -72.7083 },
-  // LOS RIOS
-  { name: 'Starken Valdivia', city: 'Valdivia', address: 'Av. Ramon Picarte 370, Valdivia', lat: -39.8196, lng: -73.2452 },
-  { name: 'Starken La Union', city: 'La Union', address: 'Av. Yungay 700, La Union', lat: -40.2928, lng: -73.0854 },
-  // LOS LAGOS
-  { name: 'Starken Puerto Montt', city: 'Puerto Montt', address: 'Av. Diego Portales 1290, Puerto Montt', lat: -41.4693, lng: -72.9421 },
-  { name: 'Starken Osorno', city: 'Osorno', address: 'Av. Matta 570, Osorno', lat: -40.5739, lng: -73.1400 },
-  { name: 'Starken Puerto Varas', city: 'Puerto Varas', address: 'Del Salvador 257, Puerto Varas', lat: -41.3175, lng: -72.9861 },
-  { name: 'Starken Castro Chiloe', city: 'Castro', address: 'Av. San Martin 780, Castro (Chiloe)', lat: -42.4784, lng: -73.7601 },
-  { name: 'Starken Ancud Chiloe', city: 'Ancud', address: 'Av. Ramirez 258, Ancud (Chiloe)', lat: -41.8702, lng: -73.8262 },
-  // AYSEN
-  { name: 'Starken Coyhaique', city: 'Coyhaique', address: 'Av. Simpson 430, Coyhaique', lat: -45.5712, lng: -72.0685 },
-  // MAGALLANES
-  { name: 'Starken Punta Arenas', city: 'Punta Arenas', address: 'Av. Espana 1385, Punta Arenas', lat: -53.1638, lng: -70.9171 },
-  // COQUIMBO / ATACAMA
-  { name: 'Starken La Serena', city: 'La Serena', address: 'Av. Francisco de Aguirre 1270, La Serena', lat: -29.9044, lng: -71.2488 },
-  { name: 'Starken Coquimbo', city: 'Coquimbo', address: 'Av. Videla 150, Coquimbo', lat: -29.9566, lng: -71.3395 },
-  { name: 'Starken Ovalle', city: 'Ovalle', address: 'Av. Libertad 498, Ovalle', lat: -30.6023, lng: -71.1993 },
-  { name: 'Starken Copiapo', city: 'Copiapo', address: 'Av. Copayapu 745, Copiapo', lat: -27.3668, lng: -70.3325 },
-  { name: 'Starken Vallenar', city: 'Vallenar', address: 'Av. Merced 540, Vallenar', lat: -28.5705, lng: -70.7592 },
-  // TARAPACA / ANTOFAGASTA
-  { name: 'Starken Iquique', city: 'Iquique', address: 'Av. Heroes de la Concepcion 1300, Iquique', lat: -20.2208, lng: -70.1431 },
-  { name: 'Starken Alto Hospicio', city: 'Alto Hospicio', address: 'Av. Camino Colchane 2340, Alto Hospicio', lat: -20.2695, lng: -70.1003 },
-  { name: 'Starken Antofagasta', city: 'Antofagasta', address: 'Av. Balmaceda 2460, Antofagasta', lat: -23.6509, lng: -70.3975 },
-  { name: 'Starken Calama', city: 'Calama', address: 'Av. Granaderos 2580, Calama', lat: -22.4564, lng: -68.9248 },
-  // ARICA
-  { name: 'Starken Arica', city: 'Arica', address: 'Av. Pedro Montt 820, Arica', lat: -18.4783, lng: -70.3126 },
-];
+// Data imported from src/data/starkenBranches.js
+
 
 // Admin Elements
 const openAdminBtn = document.getElementById('open-admin-btn');

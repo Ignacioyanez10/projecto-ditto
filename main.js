@@ -802,12 +802,11 @@ function openStarkenMapModal() {
   // Reset search
   const searchInput = document.getElementById('starken-search-input');
   if (searchInput) searchInput.value = '';
-  filteredBranches = [...STARKEN_BRANCHES];
 
   // Init map after modal is visible (needs dimensions)
   setTimeout(() => {
     initStarkenMap();
-    renderBranchList(filteredBranches);
+    filterStarkenBranches(); // Reset map markers and list to show all branches
   }, 120);
 }
 

@@ -165,29 +165,14 @@
 
         <!-- Sucursal Starken selector -->
         <div class="form-group" id="sucursal-group" style="display:none;">
-          <label>Sucursal Starken seleccionada:</label>
-          <div class="starken-selected-display" id="starken-selected-display">
-            <div class="starken-placeholder" id="starken-placeholder">
-              <span class="material-symbols-outlined">location_on</span>
-              <span>Ninguna sucursal seleccionada</span>
-            </div>
-            <div class="starken-chip" id="starken-chip" style="display:none;">
-              <span class="material-symbols-outlined" style="color:#e63946;">location_on</span>
-              <div class="starken-chip-info">
-                <span class="starken-chip-name" id="starken-chip-name"></span>
-                <span class="starken-chip-address" id="starken-chip-address"></span>
-              </div>
-              <button type="button" class="starken-chip-change" id="starken-chip-change" title="Cambiar sucursal">
-                <span class="material-symbols-outlined">edit</span>
-              </button>
-            </div>
+          <label for="order-address-starken">Nombre o Dirección de Sucursal Starken:</label>
+          <div style="display: flex; gap: 0.5rem; align-items: stretch;">
+            <input type="text" id="order-address-starken" placeholder="Ej: Starken El Carmen, San Ignacio" style="flex: 1; margin-bottom: 0;">
+            <button type="button" class="btn-starken-map" id="open-starken-map-btn" style="width: auto; padding: 0 1rem; margin-top: 0; display: flex; align-items: center; justify-content: center;" title="Buscar en el mapa">
+              <span class="material-symbols-outlined">map</span>
+            </button>
           </div>
-          <button type="button" class="btn-starken-map" id="open-starken-map-btn">
-            <span class="material-symbols-outlined">map</span>
-            [ ELEGIR SUCURSAL EN EL MAPA ]
-          </button>
-          <!-- Hidden input for form validation -->
-          <input type="hidden" id="order-address-starken">
+          <small style="color: #666; display: block; margin-top: 0.5rem;">Escribe la sucursal manualmente o búscala en el mapa.</small>
         </div>
         <button type="submit" class="btn-primary" id="order-submit-btn" style="width: 100%; margin-top: 1rem;">
           [ ENVIAR PEDIDO POR INSTAGRAM ]

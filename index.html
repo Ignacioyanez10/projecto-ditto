@@ -12,6 +12,8 @@
     rel="stylesheet">
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <!-- Leaflet CSS (mapa sucursales Starken) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="/style.css">
   <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
@@ -140,10 +142,52 @@
           <label for="order-city">Ciudad / Comuna:</label>
           <input type="text" id="order-city" placeholder="Ej: Santiago / Providencia" required>
         </div>
-        <div class="form-group">
-          <label for="order-address">Dirección o Sucursal Starken:</label>
-          <input type="text" id="order-address" placeholder="Ej: Av. Providencia 1234 o Sucursal Starken Tobalaba"
-            required>
+        <!-- Delivery type toggle -->
+        <div class="form-group delivery-type-group">
+          <label>Tipo de entrega:</label>
+          <div class="delivery-type-tabs" id="delivery-type-tabs">
+            <button type="button" class="delivery-tab active" id="tab-domicilio" data-type="domicilio">
+              <span class="material-symbols-outlined">home</span>
+              Domicilio
+            </button>
+            <button type="button" class="delivery-tab" id="tab-sucursal" data-type="sucursal">
+              <span class="material-symbols-outlined">local_shipping</span>
+              Sucursal Starken
+            </button>
+          </div>
+        </div>
+
+        <!-- Domicilio input -->
+        <div class="form-group" id="domicilio-group">
+          <label for="order-address">Dirección de despacho:</label>
+          <input type="text" id="order-address" placeholder="Ej: Av. Providencia 1234, Depto 502, Providencia">
+        </div>
+
+        <!-- Sucursal Starken selector -->
+        <div class="form-group" id="sucursal-group" style="display:none;">
+          <label>Sucursal Starken seleccionada:</label>
+          <div class="starken-selected-display" id="starken-selected-display">
+            <div class="starken-placeholder" id="starken-placeholder">
+              <span class="material-symbols-outlined">location_on</span>
+              <span>Ninguna sucursal seleccionada</span>
+            </div>
+            <div class="starken-chip" id="starken-chip" style="display:none;">
+              <span class="material-symbols-outlined" style="color:#e63946;">location_on</span>
+              <div class="starken-chip-info">
+                <span class="starken-chip-name" id="starken-chip-name"></span>
+                <span class="starken-chip-address" id="starken-chip-address"></span>
+              </div>
+              <button type="button" class="starken-chip-change" id="starken-chip-change" title="Cambiar sucursal">
+                <span class="material-symbols-outlined">edit</span>
+              </button>
+            </div>
+          </div>
+          <button type="button" class="btn-starken-map" id="open-starken-map-btn">
+            <span class="material-symbols-outlined">map</span>
+            [ ELEGIR SUCURSAL EN EL MAPA ]
+          </button>
+          <!-- Hidden input for form validation -->
+          <input type="hidden" id="order-address-starken">
         </div>
         <button type="submit" class="btn-primary" id="order-submit-btn" style="width: 100%; margin-top: 1rem;">
           [ ENVIAR PEDIDO POR INSTAGRAM ]
@@ -152,6 +196,44 @@
     </div>
   </div>
   <div class="cart-overlay" id="order-overlay"></div>
+
+  <!-- ===== Starken Map Modal ===== -->
+  <div class="starken-map-modal" id="starken-map-modal" aria-hidden="true" role="dialog" aria-label="Seleccionar Sucursal Starken">
+    <div class="starken-map-content">
+      <div class="starken-map-header">
+        <div class="starken-map-title">
+          <span class="material-symbols-outlined" style="color:#e63946;">local_shipping</span>
+          <h2>[ SUCURSALES STARKEN ]</h2>
+        </div>
+        <button class="close-admin" id="close-starken-map" type="button" aria-label="Cerrar mapa">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="starken-map-search-bar">
+        <span class="material-symbols-outlined starken-search-icon">search</span>
+        <input
+          type="text"
+          id="starken-search-input"
+          placeholder="Buscar por ciudad o nombre de sucursal..."
+          autocomplete="off"
+        >
+        <span class="starken-result-count" id="starken-result-count"></span>
+      </div>
+
+      <div class="starken-map-body">
+        <!-- Leaflet map -->
+        <div id="starken-map" class="starken-map-container"></div>
+
+        <!-- Branch list sidebar -->
+        <div class="starken-branch-list" id="starken-branch-list">
+          <p class="starken-list-hint">Haz clic en un marcador del mapa o en una sucursal de la lista:</p>
+          <div id="starken-branch-items"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cart-overlay" id="starken-map-overlay"></div>
 
   <!-- Admin Login Modal -->
   <div class="admin-modal" id="login-modal">
@@ -313,6 +395,8 @@
   </div>
   <div class="cart-overlay" id="lightbox-overlay"></div>
 
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script type="module" src="/main.js"></script>
 </body>
 

@@ -104,7 +104,88 @@ const orderRutInput = document.getElementById('order-rut');
 const orderPhoneInput = document.getElementById('order-phone');
 const orderCityInput = document.getElementById('order-city');
 const orderAddressInput = document.getElementById('order-address');
+const orderAddressStarkenInput = document.getElementById('order-address-starken');
 const orderSubmitBtn = document.getElementById('order-submit-btn');
+
+// Delivery mode state: 'domicilio' | 'sucursal'
+let deliveryMode = 'domicilio';
+let selectedStarkenBranch = null;
+
+// ================================================================
+// STARKEN BRANCHES DATA
+// ================================================================
+const STARKEN_BRANCHES = [
+  // REGION METROPOLITANA
+  { name: 'Starken Santiago Centro', city: 'Santiago', address: 'Monjitas 392, Santiago', lat: -33.4372, lng: -70.6506 },
+  { name: 'Starken Providencia', city: 'Providencia', address: 'Av. Providencia 1991, Providencia', lat: -33.4292, lng: -70.6108 },
+  { name: 'Starken Las Condes', city: 'Las Condes', address: 'Av. Apoquindo 4800, Las Condes', lat: -33.4117, lng: -70.5750 },
+  { name: 'Starken Nunoa', city: 'Nunoa', address: 'Av. Irarrazaval 1890, Nunoa', lat: -33.4572, lng: -70.6102 },
+  { name: 'Starken La Florida', city: 'La Florida', address: 'Av. Vicuna Mackenna 7700, La Florida', lat: -33.5253, lng: -70.5944 },
+  { name: 'Starken Maipu', city: 'Maipu', address: 'Av. Pajaritos 3939, Maipu', lat: -33.5139, lng: -70.7678 },
+  { name: 'Starken Pudahuel', city: 'Pudahuel', address: 'Av. El Sol 670, Pudahuel', lat: -33.4406, lng: -70.7555 },
+  { name: 'Starken Quilicura', city: 'Quilicura', address: 'Av. Manuel Antonio Matta 1855, Quilicura', lat: -33.3656, lng: -70.7303 },
+  { name: 'Starken San Bernardo', city: 'San Bernardo', address: 'Av. Presidente Alessandri 4001, San Bernardo', lat: -33.5943, lng: -70.6997 },
+  { name: 'Starken Puente Alto', city: 'Puente Alto', address: 'Av. Concha y Toro 1055, Puente Alto', lat: -33.6109, lng: -70.5763 },
+  { name: 'Starken Penalolen', city: 'Penalolen', address: 'Av. Grecia 7801, Penalolen', lat: -33.4809, lng: -70.5480 },
+  { name: 'Starken Recoleta', city: 'Recoleta', address: 'Av. Recoleta 2345, Recoleta', lat: -33.4006, lng: -70.6398 },
+  { name: 'Starken Estacion Central', city: 'Estacion Central', address: 'Av. Alameda 3242, Estacion Central', lat: -33.4548, lng: -70.6839 },
+  { name: 'Starken La Cisterna', city: 'La Cisterna', address: 'Av. Lo Ovalle 1235, La Cisterna', lat: -33.5318, lng: -70.6626 },
+  { name: 'Starken Renca', city: 'Renca', address: 'Av. Eduardo Frei 6220, Renca', lat: -33.4044, lng: -70.7266 },
+  { name: 'Starken Penaflor', city: 'Penaflor', address: 'Av. Bernardo OHiggins 691, Penaflor', lat: -33.6144, lng: -70.8814 },
+  { name: 'Starken Melipilla', city: 'Melipilla', address: 'Av. OHiggins 520, Melipilla', lat: -33.6886, lng: -71.2137 },
+  // VALPARAISO / VINA
+  { name: 'Starken Valparaiso', city: 'Valparaiso', address: 'Av. Argentina 68, Valparaiso', lat: -33.0453, lng: -71.6205 },
+  { name: 'Starken Vina del Mar', city: 'Vina del Mar', address: 'Av. Libertad 770, Vina del Mar', lat: -33.0245, lng: -71.5518 },
+  { name: 'Starken Quilpue', city: 'Quilpue', address: 'Av. Los Carrera 600, Quilpue', lat: -33.0480, lng: -71.4428 },
+  { name: 'Starken Villa Alemana', city: 'Villa Alemana', address: 'Av. Vina del Mar 95, Villa Alemana', lat: -33.0420, lng: -71.3742 },
+  { name: 'Starken San Antonio', city: 'San Antonio', address: 'Av. Barros Luco 30, San Antonio', lat: -33.5936, lng: -71.6202 },
+  { name: 'Starken La Calera', city: 'La Calera', address: 'Av. Latorre 1510, La Calera', lat: -32.7887, lng: -71.1982 },
+  { name: 'Starken Los Andes', city: 'Los Andes', address: 'Av. Santa Rosa 285, Los Andes', lat: -32.8350, lng: -70.5983 },
+  // OHIGGINS
+  { name: 'Starken Rancagua', city: 'Rancagua', address: 'Av. Espana 660, Rancagua', lat: -34.1703, lng: -70.7444 },
+  { name: 'Starken San Fernando', city: 'San Fernando', address: 'Manso de Velasco 980, San Fernando', lat: -34.5853, lng: -70.9899 },
+  // MAULE
+  { name: 'Starken Talca', city: 'Talca', address: 'Av. Las Heras 190, Talca', lat: -35.4264, lng: -71.6554 },
+  { name: 'Starken Curico', city: 'Curico', address: 'Pena 730, Curico', lat: -34.9853, lng: -71.2390 },
+  { name: 'Starken Linares', city: 'Linares', address: 'Av. Valentin Letelier 575, Linares', lat: -35.8459, lng: -71.5960 },
+  // NUBLE / BIO-BIO
+  { name: 'Starken Chillan', city: 'Chillan', address: 'Av. Arauco 541, Chillan', lat: -36.6064, lng: -72.1034 },
+  { name: 'Starken Concepcion', city: 'Concepcion', address: 'Caupolican 521, Concepcion', lat: -36.8270, lng: -73.0498 },
+  { name: 'Starken Talcahuano', city: 'Talcahuano', address: 'Av. Colon 550, Talcahuano', lat: -36.7242, lng: -73.1174 },
+  { name: 'Starken Coronel', city: 'Coronel', address: 'Av. Alessandri 1200, Coronel', lat: -37.0268, lng: -73.1501 },
+  { name: 'Starken Los Angeles', city: 'Los Angeles', address: 'Av. Ricardo Vicuna 301, Los Angeles', lat: -37.4702, lng: -72.3536 },
+  // ARAUCANIA
+  { name: 'Starken Temuco', city: 'Temuco', address: 'Av. Balmaceda 755, Temuco', lat: -38.7359, lng: -72.5904 },
+  { name: 'Starken Villarrica', city: 'Villarrica', address: 'Av. Pedro de Valdivia 950, Villarrica', lat: -39.2847, lng: -72.2282 },
+  { name: 'Starken Pucon', city: 'Pucon', address: 'Av. OHiggins 190, Pucon', lat: -39.2722, lng: -71.9801 },
+  { name: 'Starken Angol', city: 'Angol', address: 'Av. Lautaro 290, Angol', lat: -37.7961, lng: -72.7083 },
+  // LOS RIOS
+  { name: 'Starken Valdivia', city: 'Valdivia', address: 'Av. Ramon Picarte 370, Valdivia', lat: -39.8196, lng: -73.2452 },
+  { name: 'Starken La Union', city: 'La Union', address: 'Av. Yungay 700, La Union', lat: -40.2928, lng: -73.0854 },
+  // LOS LAGOS
+  { name: 'Starken Puerto Montt', city: 'Puerto Montt', address: 'Av. Diego Portales 1290, Puerto Montt', lat: -41.4693, lng: -72.9421 },
+  { name: 'Starken Osorno', city: 'Osorno', address: 'Av. Matta 570, Osorno', lat: -40.5739, lng: -73.1400 },
+  { name: 'Starken Puerto Varas', city: 'Puerto Varas', address: 'Del Salvador 257, Puerto Varas', lat: -41.3175, lng: -72.9861 },
+  { name: 'Starken Castro Chiloe', city: 'Castro', address: 'Av. San Martin 780, Castro (Chiloe)', lat: -42.4784, lng: -73.7601 },
+  { name: 'Starken Ancud Chiloe', city: 'Ancud', address: 'Av. Ramirez 258, Ancud (Chiloe)', lat: -41.8702, lng: -73.8262 },
+  // AYSEN
+  { name: 'Starken Coyhaique', city: 'Coyhaique', address: 'Av. Simpson 430, Coyhaique', lat: -45.5712, lng: -72.0685 },
+  // MAGALLANES
+  { name: 'Starken Punta Arenas', city: 'Punta Arenas', address: 'Av. Espana 1385, Punta Arenas', lat: -53.1638, lng: -70.9171 },
+  // COQUIMBO / ATACAMA
+  { name: 'Starken La Serena', city: 'La Serena', address: 'Av. Francisco de Aguirre 1270, La Serena', lat: -29.9044, lng: -71.2488 },
+  { name: 'Starken Coquimbo', city: 'Coquimbo', address: 'Av. Videla 150, Coquimbo', lat: -29.9566, lng: -71.3395 },
+  { name: 'Starken Ovalle', city: 'Ovalle', address: 'Av. Libertad 498, Ovalle', lat: -30.6023, lng: -71.1993 },
+  { name: 'Starken Copiapo', city: 'Copiapo', address: 'Av. Copayapu 745, Copiapo', lat: -27.3668, lng: -70.3325 },
+  { name: 'Starken Vallenar', city: 'Vallenar', address: 'Av. Merced 540, Vallenar', lat: -28.5705, lng: -70.7592 },
+  // TARAPACA / ANTOFAGASTA
+  { name: 'Starken Iquique', city: 'Iquique', address: 'Av. Heroes de la Concepcion 1300, Iquique', lat: -20.2208, lng: -70.1431 },
+  { name: 'Starken Alto Hospicio', city: 'Alto Hospicio', address: 'Av. Camino Colchane 2340, Alto Hospicio', lat: -20.2695, lng: -70.1003 },
+  { name: 'Starken Antofagasta', city: 'Antofagasta', address: 'Av. Balmaceda 2460, Antofagasta', lat: -23.6509, lng: -70.3975 },
+  { name: 'Starken Calama', city: 'Calama', address: 'Av. Granaderos 2580, Calama', lat: -22.4564, lng: -68.9248 },
+  // ARICA
+  { name: 'Starken Arica', city: 'Arica', address: 'Av. Pedro Montt 820, Arica', lat: -18.4783, lng: -70.3126 },
+];
 
 // Admin Elements
 const openAdminBtn = document.getElementById('open-admin-btn');
@@ -718,9 +799,292 @@ function setupEventListeners() {
   if (closeOrderModalBtn) closeOrderModalBtn.addEventListener('click', closeOrderModal);
   if (orderOverlay) orderOverlay.addEventListener('click', closeOrderModal);
   if (orderForm) orderForm.addEventListener('submit', handleOrderSubmit);
-
   if (checkoutBtn) checkoutBtn.addEventListener('click', openOrderModal);
+
+  // Delivery type tabs
+  const deliveryTabs = document.getElementById('delivery-type-tabs');
+  if (deliveryTabs) {
+    deliveryTabs.addEventListener('click', (e) => {
+      const tab = e.target.closest('.delivery-tab');
+      if (!tab) return;
+      setDeliveryMode(tab.getAttribute('data-type'));
+    });
+  }
+
+  // Open Starken map modal
+  const openMapBtn = document.getElementById('open-starken-map-btn');
+  if (openMapBtn) openMapBtn.addEventListener('click', openStarkenMapModal);
+
+  // Change selected Starken branch
+  const changeChipBtn = document.getElementById('starken-chip-change');
+  if (changeChipBtn) changeChipBtn.addEventListener('click', openStarkenMapModal);
+
+  // Close Starken map modal
+  const closeMapBtn = document.getElementById('close-starken-map');
+  if (closeMapBtn) closeMapBtn.addEventListener('click', closeStarkenMapModal);
+  const starkenMapOverlay = document.getElementById('starken-map-overlay');
+  if (starkenMapOverlay) starkenMapOverlay.addEventListener('click', closeStarkenMapModal);
+
+  // Starken search input
+  const starkenSearch = document.getElementById('starken-search-input');
+  if (starkenSearch) starkenSearch.addEventListener('input', filterStarkenBranches);
 }
+
+// ================================================================
+// STARKEN MAP LOGIC
+// ================================================================
+let starkenMap = null;
+let starkenMarkers = [];
+let filteredBranches = [...STARKEN_BRANCHES];
+
+function setDeliveryMode(mode) {
+  deliveryMode = mode;
+  const domicilioGroup = document.getElementById('domicilio-group');
+  const sucursalGroup = document.getElementById('sucursal-group');
+  const tabDomicilio = document.getElementById('tab-domicilio');
+  const tabSucursal = document.getElementById('tab-sucursal');
+
+  if (mode === 'domicilio') {
+    if (domicilioGroup) domicilioGroup.style.display = '';
+    if (sucursalGroup) sucursalGroup.style.display = 'none';
+    if (tabDomicilio) tabDomicilio.classList.add('active');
+    if (tabSucursal) tabSucursal.classList.remove('active');
+    if (orderAddressInput) orderAddressInput.required = true;
+  } else {
+    if (domicilioGroup) domicilioGroup.style.display = 'none';
+    if (sucursalGroup) sucursalGroup.style.display = '';
+    if (tabDomicilio) tabDomicilio.classList.remove('active');
+    if (tabSucursal) tabSucursal.classList.add('active');
+    if (orderAddressInput) orderAddressInput.required = false;
+  }
+}
+
+function openStarkenMapModal() {
+  const modal = document.getElementById('starken-map-modal');
+  const overlay = document.getElementById('starken-map-overlay');
+  if (!modal || !overlay) return;
+
+  modal.classList.add('active');
+  modal.setAttribute('aria-hidden', 'false');
+  overlay.classList.add('active');
+
+  // Reset search
+  const searchInput = document.getElementById('starken-search-input');
+  if (searchInput) searchInput.value = '';
+  filteredBranches = [...STARKEN_BRANCHES];
+
+  // Init map after modal is visible (needs dimensions)
+  setTimeout(() => {
+    initStarkenMap();
+    renderBranchList(filteredBranches);
+  }, 120);
+}
+
+function closeStarkenMapModal() {
+  const modal = document.getElementById('starken-map-modal');
+  const overlay = document.getElementById('starken-map-overlay');
+  if (!modal || !overlay) return;
+  modal.classList.remove('active');
+  modal.setAttribute('aria-hidden', 'true');
+  overlay.classList.remove('active');
+}
+
+function initStarkenMap() {
+  // If map already initialized, just invalidate size and update markers
+  if (starkenMap) {
+    starkenMap.invalidateSize();
+    return;
+  }
+
+  // Create custom red marker icon
+  const starkenIcon = window.L ? L.divIcon({
+    className: 'starken-marker',
+    html: '<span class="material-symbols-outlined" style="color:#e63946;font-size:1.6rem;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.35));">location_on</span>',
+    iconSize: [28, 28],
+    iconAnchor: [14, 28],
+    popupAnchor: [0, -30],
+  }) : null;
+
+  // Center on Chile
+  starkenMap = L.map('starken-map', {
+    zoomControl: true,
+    scrollWheelZoom: true,
+  }).setView([-35.6, -71.5], 5);
+
+  // OpenStreetMap tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  }).addTo(starkenMap);
+
+  // Add markers for all branches
+  STARKEN_BRANCHES.forEach((branch) => {
+    const marker = L.marker([branch.lat, branch.lng], starkenIcon ? { icon: starkenIcon } : {})
+      .addTo(starkenMap)
+      .bindPopup(buildPopupContent(branch), { maxWidth: 240 });
+
+    marker.on('click', () => {
+      marker.openPopup();
+      // Highlight list item
+      highlightListItem(branch.name);
+    });
+
+    // Attach branch data to marker for filtering
+    marker._starkenBranch = branch;
+    starkenMarkers.push(marker);
+  });
+
+  // Listen for popup button clicks (event delegation on map container)
+  document.getElementById('starken-map').addEventListener('click', (e) => {
+    const btn = e.target.closest('.starken-select-btn');
+    if (!btn) return;
+    const name = btn.getAttribute('data-name');
+    const branch = STARKEN_BRANCHES.find(b => b.name === name);
+    if (branch) selectStarkenBranch(branch);
+  });
+}
+
+function buildPopupContent(branch) {
+  return `
+    <div class="starken-popup">
+      <div class="starken-popup-name">${branch.name}</div>
+      <div class="starken-popup-city">${branch.city}</div>
+      <div class="starken-popup-address">${branch.address}</div>
+      <button class="starken-select-btn" data-name="${branch.name}">
+        <span class="material-symbols-outlined">check_circle</span>
+        Seleccionar esta sucursal
+      </button>
+    </div>
+  `;
+}
+
+function selectStarkenBranch(branch) {
+  selectedStarkenBranch = branch;
+
+  // Update chip display
+  const placeholder = document.getElementById('starken-placeholder');
+  const chip = document.getElementById('starken-chip');
+  const chipName = document.getElementById('starken-chip-name');
+  const chipAddress = document.getElementById('starken-chip-address');
+  const hiddenInput = document.getElementById('order-address-starken');
+
+  if (placeholder) placeholder.style.display = 'none';
+  if (chip) chip.style.display = 'flex';
+  if (chipName) chipName.textContent = branch.name;
+  if (chipAddress) chipAddress.textContent = branch.address;
+  if (hiddenInput) hiddenInput.value = `${branch.name} - ${branch.address}`;
+
+  // Clear any error state
+  const sucursalGroup = document.getElementById('sucursal-group');
+  if (sucursalGroup) {
+    sucursalGroup.querySelectorAll('.field-error-msg').forEach(el => el.remove());
+    const display = document.getElementById('starken-selected-display');
+    if (display) display.classList.remove('input-error');
+  }
+
+  closeStarkenMapModal();
+  showToastNotification(`📍 Sucursal seleccionada: ${branch.name}`, 'location_on', 4000);
+}
+
+function filterStarkenBranches() {
+  const searchInput = document.getElementById('starken-search-input');
+  const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+  filteredBranches = query
+    ? STARKEN_BRANCHES.filter(b =>
+        b.name.toLowerCase().includes(query) ||
+        b.city.toLowerCase().includes(query) ||
+        b.address.toLowerCase().includes(query)
+      )
+    : [...STARKEN_BRANCHES];
+
+  // Update result count
+  const countEl = document.getElementById('starken-result-count');
+  if (countEl) {
+    countEl.textContent = query ? `${filteredBranches.length} resultado${filteredBranches.length !== 1 ? 's' : ''}` : '';
+  }
+
+  // Show/hide markers on map
+  if (starkenMap) {
+    starkenMarkers.forEach(marker => {
+      const branch = marker._starkenBranch;
+      const visible = filteredBranches.some(b => b.name === branch.name);
+      if (visible) {
+        if (!starkenMap.hasLayer(marker)) marker.addTo(starkenMap);
+      } else {
+        if (starkenMap.hasLayer(marker)) marker.remove();
+      }
+    });
+
+    // Fit map to visible markers
+    if (filteredBranches.length > 0 && filteredBranches.length < STARKEN_BRANCHES.length) {
+      const group = L.featureGroup(
+        starkenMarkers.filter(m => filteredBranches.some(b => b.name === m._starkenBranch.name))
+      );
+      starkenMap.fitBounds(group.getBounds().pad(0.3));
+    } else if (filteredBranches.length === STARKEN_BRANCHES.length) {
+      starkenMap.setView([-35.6, -71.5], 5);
+    }
+  }
+
+  renderBranchList(filteredBranches);
+}
+
+function renderBranchList(branches) {
+  const container = document.getElementById('starken-branch-items');
+  if (!container) return;
+
+  if (branches.length === 0) {
+    container.innerHTML = '<p class="starken-no-results">No se encontraron sucursales.</p>';
+    return;
+  }
+
+  container.innerHTML = branches.map(branch => `
+    <div class="starken-list-item" data-name="${branch.name}">
+      <div class="starken-list-item-info">
+        <span class="starken-list-item-name">${branch.name}</span>
+        <span class="starken-list-item-address">${branch.address}</span>
+      </div>
+      <button class="starken-list-select-btn" data-name="${branch.name}" title="Seleccionar">
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
+    </div>
+  `).join('');
+
+  // Event delegation on list
+  container.onclick = (e) => {
+    const btn = e.target.closest('.starken-list-select-btn') || e.target.closest('.starken-list-item');
+    if (!btn) return;
+    const name = btn.getAttribute('data-name');
+    const branch = STARKEN_BRANCHES.find(b => b.name === name);
+    if (!branch) return;
+
+    // If a list item (not just button) was clicked, fly map to it and open popup
+    if (e.target.closest('.starken-list-item') && !e.target.closest('.starken-list-select-btn')) {
+      if (starkenMap) {
+        starkenMap.flyTo([branch.lat, branch.lng], 14, { duration: 0.8 });
+        const marker = starkenMarkers.find(m => m._starkenBranch.name === name);
+        if (marker) setTimeout(() => marker.openPopup(), 900);
+      }
+    } else {
+      selectStarkenBranch(branch);
+    }
+    highlightListItem(name);
+  };
+}
+
+function highlightListItem(name) {
+  const container = document.getElementById('starken-branch-items');
+  if (!container) return;
+  container.querySelectorAll('.starken-list-item').forEach(item => {
+    item.classList.toggle('highlighted', item.getAttribute('data-name') === name);
+  });
+  // Scroll highlighted into view
+  const highlighted = container.querySelector('.starken-list-item.highlighted');
+  if (highlighted) highlighted.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+
 
 // ================================================================
 // ADMIN LOGIN
@@ -1249,7 +1613,11 @@ async function handleOrderSubmit(e) {
   const rutVal = (orderRutInput && orderRutInput.value.trim()) || '';
   const phoneVal = (orderPhoneInput && orderPhoneInput.value.trim()) || '';
   const cityVal = (orderCityInput && orderCityInput.value.trim()) || '';
-  const addressVal = (orderAddressInput && orderAddressInput.value.trim()) || '';
+
+  // Address depends on delivery mode
+  const addressVal = deliveryMode === 'sucursal'
+    ? (orderAddressStarkenInput && orderAddressStarkenInput.value.trim()) || ''
+    : (orderAddressInput && orderAddressInput.value.trim()) || '';
 
   let hasErrors = false;
 
@@ -1283,10 +1651,30 @@ async function handleOrderSubmit(e) {
     hasErrors = true;
   }
 
-  // 6. Address validation
-  if (!addressVal || addressVal.length < 4) {
-    showFieldError(orderAddressInput, 'Ingresa tu dirección completa o sucursal Starken');
-    hasErrors = true;
+  // 6. Address / Starken branch validation
+  if (deliveryMode === 'sucursal') {
+    if (!addressVal) {
+      const display = document.getElementById('starken-selected-display');
+      if (display) {
+        display.classList.add('input-error');
+        const sucursalGroup = document.getElementById('sucursal-group');
+        if (sucursalGroup) {
+          let errorElem = sucursalGroup.querySelector('.field-error-msg');
+          if (!errorElem) {
+            errorElem = document.createElement('span');
+            errorElem.className = 'field-error-msg';
+            sucursalGroup.appendChild(errorElem);
+          }
+          errorElem.textContent = 'Selecciona una sucursal Starken en el mapa';
+        }
+      }
+      hasErrors = true;
+    }
+  } else {
+    if (!addressVal || addressVal.length < 4) {
+      showFieldError(orderAddressInput, 'Ingresa tu dirección completa de despacho');
+      hasErrors = true;
+    }
   }
 
   if (hasErrors) {
@@ -1298,6 +1686,7 @@ async function handleOrderSubmit(e) {
 
   const formattedRut = formatRut(rutVal);
   const total = cart.reduce((sum, item) => sum + item.price, 0);
+  const deliveryLabel = deliveryMode === 'sucursal' ? 'Retiro en Sucursal Starken' : 'Despacho a Domicilio';
 
   // Build complete structured purchase form message
   let message = `HOLA DITTO\n`;
@@ -1324,7 +1713,8 @@ async function handleOrderSubmit(e) {
   message += `• RUT: ${formattedRut}\n`;
   message += `• Teléfono / WhatsApp: ${phoneVal}\n`;
   message += `• Ciudad / Comuna: ${cityVal}\n`;
-  message += `• Sucursal Starken o Domicilio: ${addressVal}\n`;
+  message += `• Tipo de entrega: ${deliveryLabel}\n`;
+  message += `• ${deliveryMode === 'sucursal' ? 'Sucursal Starken' : 'Dirección de despacho'}: ${addressVal}\n`;
   message += `• Medio de Pago: Transferencia Bancaria\n\n`;
   message += `¡Hola Ditto! Vengo desde el catálogo web y deseo comprar estas piezas. ¿Me confirmas disponibilidad y datos de transferencia? 🙌`;
 

@@ -1,7 +1,5 @@
 import './style.css';
 import { supabase, isSupabaseConfigured } from './src/supabase.js';
-import { STARKEN_BRANCHES } from './src/data/starkenBranches.js';
-
 // ============================================================
 // CONFIGURACIÓN DEL ADMINISTRADOR
 // Cambia estos valores para modificar el usuario y contraseña
@@ -110,13 +108,6 @@ const orderSubmitBtn = document.getElementById('order-submit-btn');
 
 // Delivery mode state: 'domicilio' | 'sucursal'
 let deliveryMode = 'domicilio';
-let selectedStarkenBranch = null;
-
-// ================================================================
-// STARKEN BRANCHES DATA
-// ================================================================
-// Data imported from src/data/starkenBranches.js
-
 
 // Admin Elements
 const openAdminBtn = document.getElementById('open-admin-btn');
@@ -742,31 +733,7 @@ function setupEventListeners() {
     });
   }
 
-  // Open Starken map modal
-  const openMapBtn = document.getElementById('open-starken-map-btn');
-  if (openMapBtn) openMapBtn.addEventListener('click', openStarkenMapModal);
-
-  // Change selected Starken branch
-  const changeChipBtn = document.getElementById('starken-chip-change');
-  if (changeChipBtn) changeChipBtn.addEventListener('click', openStarkenMapModal);
-
-  // Close Starken map modal
-  const closeMapBtn = document.getElementById('close-starken-map');
-  if (closeMapBtn) closeMapBtn.addEventListener('click', closeStarkenMapModal);
-  const starkenMapOverlay = document.getElementById('starken-map-overlay');
-  if (starkenMapOverlay) starkenMapOverlay.addEventListener('click', closeStarkenMapModal);
-
-  // Starken search input
-  const starkenSearch = document.getElementById('starken-search-input');
-  if (starkenSearch) starkenSearch.addEventListener('input', filterStarkenBranches);
 }
-
-// ================================================================
-// STARKEN MAP LOGIC
-// ================================================================
-let starkenMap = null;
-let starkenMarkers = [];
-let filteredBranches = [...STARKEN_BRANCHES];
 
 function setDeliveryMode(mode) {
   deliveryMode = mode;
@@ -789,223 +756,6 @@ function setDeliveryMode(mode) {
     if (orderAddressInput) orderAddressInput.required = false;
   }
 }
-
-function openStarkenMapModal() {
-  const modal = document.getElementById('starken-map-modal');
-  const overlay = document.getElementById('starken-map-overlay');
-  if (!modal || !overlay) return;
-
-  modal.classList.add('active');
-  modal.setAttribute('aria-hidden', 'false');
-  overlay.classList.add('active');
-
-  // Reset search
-  const searchInput = document.getElementById('starken-search-input');
-  if (searchInput) searchInput.value = '';
-
-  // Init map after modal is visible (needs dimensions)
-  setTimeout(() => {
-    initStarkenMap();
-    filterStarkenBranches(); // Reset map markers and list to show all branches
-  }, 120);
-}
-
-function closeStarkenMapModal() {
-  const modal = document.getElementById('starken-map-modal');
-  const overlay = document.getElementById('starken-map-overlay');
-  if (!modal || !overlay) return;
-  modal.classList.remove('active');
-  modal.setAttribute('aria-hidden', 'true');
-  overlay.classList.remove('active');
-}
-
-function initStarkenMap() {
-  // If map already initialized, just invalidate size and update markers
-  if (starkenMap) {
-    starkenMap.invalidateSize();
-    return;
-  }
-
-  // Create custom red marker icon
-  const starkenIcon = window.L ? L.divIcon({
-    className: 'starken-marker',
-    html: '<span class="material-symbols-outlined" style="color:#e63946;font-size:1.6rem;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.35));">location_on</span>',
-    iconSize: [28, 28],
-    iconAnchor: [14, 28],
-    popupAnchor: [0, -30],
-  }) : null;
-
-  // Center on Chile
-  starkenMap = L.map('starken-map', {
-    zoomControl: true,
-    scrollWheelZoom: true,
-  }).setView([-35.6, -71.5], 5);
-
-  // OpenStreetMap tiles
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 18,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-  }).addTo(starkenMap);
-
-  // Add markers for all branches
-  STARKEN_BRANCHES.forEach((branch) => {
-    const marker = L.marker([branch.lat, branch.lng], starkenIcon ? { icon: starkenIcon } : {})
-      .addTo(starkenMap)
-      .bindPopup(buildPopupContent(branch), { maxWidth: 240 });
-
-    marker.on('click', () => {
-      marker.openPopup();
-      // Highlight list item
-      highlightListItem(branch.name);
-    });
-
-    // Attach branch data to marker for filtering
-    marker._starkenBranch = branch;
-    starkenMarkers.push(marker);
-  });
-
-  // Listen for popup button clicks (event delegation on map container)
-  document.getElementById('starken-map').addEventListener('click', (e) => {
-    const btn = e.target.closest('.starken-select-btn');
-    if (!btn) return;
-    const name = btn.getAttribute('data-name');
-    const branch = STARKEN_BRANCHES.find(b => b.name === name);
-    if (branch) selectStarkenBranch(branch);
-  });
-}
-
-function buildPopupContent(branch) {
-  return `
-    <div class="starken-popup">
-      <div class="starken-popup-name">${branch.name}</div>
-      <div class="starken-popup-city">${branch.city}</div>
-      <div class="starken-popup-address">${branch.address}</div>
-      <button class="starken-select-btn" data-name="${branch.name}">
-        <span class="material-symbols-outlined">check_circle</span>
-        Seleccionar esta sucursal
-      </button>
-    </div>
-  `;
-}
-
-function selectStarkenBranch(branch) {
-  selectedStarkenBranch = branch;
-
-  const addressInput = document.getElementById('order-address-starken');
-  if (addressInput) {
-    addressInput.value = `${branch.name} - ${branch.address}`;
-    addressInput.classList.remove('input-error');
-  }
-
-  // Clear any error state
-  const sucursalGroup = document.getElementById('sucursal-group');
-  if (sucursalGroup) {
-    sucursalGroup.querySelectorAll('.field-error-msg').forEach(el => el.remove());
-  }
-
-  closeStarkenMapModal();
-  showToastNotification(`📍 Sucursal seleccionada: ${branch.name}`, 'location_on', 4000);
-}
-
-function filterStarkenBranches() {
-  const searchInput = document.getElementById('starken-search-input');
-  const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
-
-  filteredBranches = query
-    ? STARKEN_BRANCHES.filter(b =>
-        b.name.toLowerCase().includes(query) ||
-        b.city.toLowerCase().includes(query) ||
-        b.address.toLowerCase().includes(query)
-      )
-    : [...STARKEN_BRANCHES];
-
-  // Update result count
-  const countEl = document.getElementById('starken-result-count');
-  if (countEl) {
-    countEl.textContent = query ? `${filteredBranches.length} resultado${filteredBranches.length !== 1 ? 's' : ''}` : '';
-  }
-
-  // Show/hide markers on map
-  if (starkenMap) {
-    starkenMarkers.forEach(marker => {
-      const branch = marker._starkenBranch;
-      const visible = filteredBranches.some(b => b.name === branch.name);
-      if (visible) {
-        if (!starkenMap.hasLayer(marker)) marker.addTo(starkenMap);
-      } else {
-        if (starkenMap.hasLayer(marker)) marker.remove();
-      }
-    });
-
-    // Fit map to visible markers
-    if (filteredBranches.length > 0 && filteredBranches.length < STARKEN_BRANCHES.length) {
-      const group = L.featureGroup(
-        starkenMarkers.filter(m => filteredBranches.some(b => b.name === m._starkenBranch.name))
-      );
-      starkenMap.fitBounds(group.getBounds().pad(0.3));
-    } else if (filteredBranches.length === STARKEN_BRANCHES.length) {
-      starkenMap.setView([-35.6, -71.5], 5);
-    }
-  }
-
-  renderBranchList(filteredBranches);
-}
-
-function renderBranchList(branches) {
-  const container = document.getElementById('starken-branch-items');
-  if (!container) return;
-
-  if (branches.length === 0) {
-    container.innerHTML = '<p class="starken-no-results">No se encontraron sucursales.</p>';
-    return;
-  }
-
-  container.innerHTML = branches.map(branch => `
-    <div class="starken-list-item" data-name="${branch.name}">
-      <div class="starken-list-item-info">
-        <span class="starken-list-item-name">${branch.name}</span>
-        <span class="starken-list-item-address">${branch.address}</span>
-      </div>
-      <button class="starken-list-select-btn" data-name="${branch.name}" title="Seleccionar">
-        <span class="material-symbols-outlined">chevron_right</span>
-      </button>
-    </div>
-  `).join('');
-
-  // Event delegation on list
-  container.onclick = (e) => {
-    const btn = e.target.closest('.starken-list-select-btn') || e.target.closest('.starken-list-item');
-    if (!btn) return;
-    const name = btn.getAttribute('data-name');
-    const branch = STARKEN_BRANCHES.find(b => b.name === name);
-    if (!branch) return;
-
-    // If a list item (not just button) was clicked, fly map to it and open popup
-    if (e.target.closest('.starken-list-item') && !e.target.closest('.starken-list-select-btn')) {
-      if (starkenMap) {
-        starkenMap.flyTo([branch.lat, branch.lng], 14, { duration: 0.8 });
-        const marker = starkenMarkers.find(m => m._starkenBranch.name === name);
-        if (marker) setTimeout(() => marker.openPopup(), 900);
-      }
-    } else {
-      selectStarkenBranch(branch);
-    }
-    highlightListItem(name);
-  };
-}
-
-function highlightListItem(name) {
-  const container = document.getElementById('starken-branch-items');
-  if (!container) return;
-  container.querySelectorAll('.starken-list-item').forEach(item => {
-    item.classList.toggle('highlighted', item.getAttribute('data-name') === name);
-  });
-  // Scroll highlighted into view
-  const highlighted = container.querySelector('.starken-list-item.highlighted');
-  if (highlighted) highlighted.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-
 
 // ================================================================
 // ADMIN LOGIN

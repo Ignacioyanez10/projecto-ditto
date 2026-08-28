@@ -521,6 +521,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
+  padding-left: 10px;
 }
 
 .footer-ig:hover {

@@ -525,7 +525,7 @@ body {
 
 .footer-ig:hover {
   text-decoration: underline;
-  transform: scale(1.50);
+  transform: scale(1.25);
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 
 }
@@ -535,7 +535,7 @@ body {
 }
 
 .footer-ig:hover .ig-icon {
-  transform: scale(1.50);
+  transform: scale(1.25);
 }
 
 .footer-admin-actions {

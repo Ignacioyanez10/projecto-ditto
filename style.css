@@ -525,6 +525,8 @@ body {
 
 .footer-ig:hover {
   text-decoration: underline;
+  transform: scale(1.50);
+
 }
 
 .ig-icon {

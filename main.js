@@ -1,12 +1,6 @@
 import './style.css';
 import { supabase, isSupabaseConfigured } from './src/supabase.js';
-// ============================================================
-// CONFIGURACIÓN DEL ADMINISTRADOR
-// Cambia estos valores para modificar el usuario y contraseña
-// ============================================================
-const ADMIN_USER = 'ditto';
-const ADMIN_PASS = '1234';
-// ============================================================
+// Configuración de credenciales eliminada: usando Supabase Auth.
 
 const PRODUCT_CATEGORIES = [
   { id: 'all', label: 'Todos' },
@@ -774,33 +768,60 @@ function closeLoginModal() {
   loginError.hidden = true;
 }
 
-function handleLogin(e) {
+async function handleLogin(e) {
   e.preventDefault();
   const user = loginUserInput.value.trim();
   const pass = loginPassInput.value;
 
-  if (user === ADMIN_USER && pass === ADMIN_PASS) {
-    document.body.classList.add('admin-mode');
-    openAdminBtn.textContent = '[ + AGREGAR PRODUCTO ]';
-    sessionStorage.setItem('ditto_admin', '1'); // persistir sesión
-    closeLoginModal();
-    renderProducts();
+  if (!isSupabaseConfigured || !supabase) {
+    loginError.textContent = 'Supabase no está configurado.';
+    loginError.hidden = false;
     return;
   }
 
-  loginError.hidden = false;
-  loginPassInput.value = '';
-  loginPassInput.focus();
+  const { error } = await supabase.auth.signInWithPassword({
+    email: user,
+    password: pass,
+  });
+
+  if (error) {
+    loginError.textContent = 'Credenciales incorrectas. Intenta de nuevo.';
+    loginError.hidden = false;
+    loginPassInput.value = '';
+    loginPassInput.focus();
+    return;
+  }
+
+  closeLoginModal();
 }
 
 // ================================================================
 // ADMIN LOGIC
 // ================================================================
-function restoreAdminSession() {
-  if (sessionStorage.getItem('ditto_admin') === '1') {
+async function restoreAdminSession() {
+  if (!isSupabaseConfigured || !supabase) return;
+
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (session) {
     document.body.classList.add('admin-mode');
     openAdminBtn.textContent = '[ + AGREGAR PRODUCTO ]';
+  } else {
+    document.body.classList.remove('admin-mode');
+    openAdminBtn.textContent = '[ ADMIN PANEL ]';
   }
+
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT') {
+      document.body.classList.remove('admin-mode');
+      openAdminBtn.textContent = '[ ADMIN PANEL ]';
+      renderProducts();
+    } else if (event === 'SIGNED_IN') {
+      document.body.classList.add('admin-mode');
+      openAdminBtn.textContent = '[ + AGREGAR PRODUCTO ]';
+      renderProducts();
+    }
+  });
 }
 function openAdminForNew() {
   // Reset form for adding a new product
@@ -823,13 +844,15 @@ function closeAdmin() {
   adminOverlay.classList.remove('active');
 }
 
-function logoutAdmin() {
-  document.body.classList.remove('admin-mode');
-  openAdminBtn.textContent = '[ ADMIN PANEL ]';
-  sessionStorage.removeItem('ditto_admin'); // limpiar sesión guardada
+async function logoutAdmin() {
+  if (isSupabaseConfigured && supabase) {
+    await supabase.auth.signOut();
+  } else {
+    document.body.classList.remove('admin-mode');
+    openAdminBtn.textContent = '[ ADMIN PANEL ]';
+  }
   closeAdmin();
   closeLoginModal();
-  renderProducts();
 }
 
 function editProduct(id) {

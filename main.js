@@ -779,18 +779,49 @@ async function handleLogin(e) {
     return;
   }
 
+  // --- Rate limiting logic ---
+  const lockoutUntil = localStorage.getItem('ditto_lockout_until');
+  if (lockoutUntil) {
+    const timeRemaining = parseInt(lockoutUntil, 10) - Date.now();
+    if (timeRemaining > 0) {
+      const minutesRemaining = Math.ceil(timeRemaining / (60 * 1000));
+      loginError.textContent = `Demasiados intentos fallidos. Intenta en ${minutesRemaining} minuto(s).`;
+      loginError.hidden = false;
+      return;
+    } else {
+      // Lockout expired, reset attempts
+      localStorage.removeItem('ditto_lockout_until');
+      localStorage.setItem('ditto_login_attempts', '0');
+    }
+  }
+
   const { error } = await supabase.auth.signInWithPassword({
     email: user,
     password: pass,
   });
 
   if (error) {
-    loginError.textContent = 'Credenciales incorrectas. Intenta de nuevo.';
+    let attempts = parseInt(localStorage.getItem('ditto_login_attempts') || '0', 10);
+    attempts++;
+    
+    if (attempts >= 6) {
+      // Bloquear por 15 minutos (15 * 60 * 1000 ms)
+      localStorage.setItem('ditto_lockout_until', (Date.now() + 15 * 60 * 1000).toString());
+      loginError.textContent = 'Demasiados intentos fallidos. Intenta en 15 minutos.';
+    } else {
+      localStorage.setItem('ditto_login_attempts', attempts.toString());
+      loginError.textContent = `Credenciales incorrectas. Intento ${attempts} de 6.`;
+    }
+
     loginError.hidden = false;
     loginPassInput.value = '';
     loginPassInput.focus();
     return;
   }
+
+  // Success, reset attempts
+  localStorage.removeItem('ditto_login_attempts');
+  localStorage.removeItem('ditto_lockout_until');
 
   closeLoginModal();
 }
